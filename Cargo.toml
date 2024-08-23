@@ -1,6 +1,16 @@
 [package]
-name = "kanttiinit-cli"
+name = "kanttiinit"
 version = "0.1.0"
+description = "Kanttiinit.fi command-line interface."
 edition = "2021"
+categories = ["command-line-utilities"]
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+path = "src/main.rs"
+name = "kanttiinit"
 
 [dependencies]
+clap = { version = "4.5.16", features = ["default", "derive", "wrap_help"] }
