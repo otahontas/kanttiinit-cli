@@ -43,8 +43,8 @@ pub struct Args {
     pub geo: Option<String>,
 
     /// Specify day
-    #[arg(short, long, default_value_t = 0)]
-    pub day: u32,
+    #[arg(short, long, default_value_t = 0, allow_hyphen_values = true)]
+    pub day: i32,
 
     /// Filter courses by keyword
     #[arg(short, long)]

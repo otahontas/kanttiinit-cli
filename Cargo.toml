@@ -14,7 +14,17 @@ name = "kanttiinit"
 
 [dependencies]
 anyhow = "1.0.86"
+chrono = "0.4.38"
 clap = { version = "4.5.16", features = ["default", "derive", "wrap_help"] }
 serde = { version = "1.0.208", features = ["derive"] }
 toml = "0.8.19"
+ureq = { version = "2.10.1", features = ["json"] }
 xdg = "2.5.2"
+
+# https://github.com/johnthagen/min-sized-rust
+[profile.release]
+strip = true
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
