@@ -1,4 +1,5 @@
 use chrono::Local;
+use color_print::cprintln;
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -26,12 +27,17 @@ type MenuId = String;
 
 type Menus = HashMap<MenuId, DailyMenu>;
 
+struct FormattedMenuItem {
+    title: String,
+    properties: String,
+}
+
 struct RestaurantWithMenu {
     name: String,
     opening_hours: Option<String>,
     address: String,
     url: String,
-    formatted_menu_items: Vec<String>,
+    formatted_menu_items: Vec<FormattedMenuItem>,
 }
 
 pub fn search_by_query(query: &str, lang: &str, day_offset: i32) -> Result<(), anyhow::Error> {
@@ -69,7 +75,6 @@ pub fn search_by_query(query: &str, lang: &str, day_offset: i32) -> Result<(), a
                     None => return None,
                 };
                 let menu_items = parsed_menu.get(&formatted_new_time.to_string());
-                println!("{:?}", menu_items);
                 let parsed_menu_items = match menu_items {
                     Some(m) => m,
                     None => return None,
@@ -82,8 +87,9 @@ pub fn search_by_query(query: &str, lang: &str, day_offset: i32) -> Result<(), a
                     url: restaurant.url.clone(),
                     formatted_menu_items: parsed_menu_items
                         .iter()
-                        .map(|menu_item| {
-                            format!("{}: {}", menu_item.title, menu_item.properties.join(", "))
+                        .map(|menu_item| FormattedMenuItem {
+                            title: menu_item.title.clone(),
+                            properties: menu_item.properties.join(", "),
                         })
                         .collect(),
                 })
@@ -93,18 +99,21 @@ pub fn search_by_query(query: &str, lang: &str, day_offset: i32) -> Result<(), a
             Some(r) => r,
             None => continue,
         };
-        println!("Restaurant: {}", restaurant_with_menu.name);
-        println!(
-            "Opening hours: {}",
+        cprintln!(
+            "<bold>{}</> <dim>{}</>",
+            restaurant_with_menu.name,
             restaurant_with_menu
                 .opening_hours
                 .unwrap_or("N/A".to_string())
         );
-        println!("Address: {}", restaurant_with_menu.address);
-        println!("URL: {}", restaurant_with_menu.url);
-        println!("Menu:");
+        cprintln!("<dim>{}</>", restaurant_with_menu.address);
+        cprintln!("<dim>{}</>", restaurant_with_menu.url);
         for formatted_menu_item in restaurant_with_menu.formatted_menu_items {
-            println!("{}", formatted_menu_item);
+            cprintln!(
+                "- {} <dim>{}</>",
+                formatted_menu_item.title,
+                formatted_menu_item.properties
+            )
         }
         println!();
     }
