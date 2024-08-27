@@ -64,13 +64,14 @@ fn create_config_directories_and_get_config_file_path() -> Result<PathBuf, anyho
         .context("Could not place config file")
 }
 
-pub fn get_lang() -> Result<Lang, anyhow::Error> {
-    Lang::from_str(
+pub fn get_lang() -> Result<String, anyhow::Error> {
+    Ok(Lang::from_str(
         &get_config_from_file_or_return_default_config()
             .context("Could not get config")?
             .lang,
     )
-    .context("Could not parse language value")
+    .context("Could not parse language value")?
+    .to_string())
 }
 
 pub fn set_lang(lang_from_user: &str) -> Result<(), anyhow::Error> {
