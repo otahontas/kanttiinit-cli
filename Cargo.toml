@@ -16,6 +16,7 @@ name = "kanttiinit"
 anyhow = "1.0.86"
 chrono = "0.4.38"
 clap = { version = "4.5.16", features = ["default", "derive", "wrap_help"] }
+color-print = "0.3.6"
 serde = { version = "1.0.208", features = ["derive"] }
 toml = "0.8.19"
 ureq = { version = "2.10.1", features = ["json"] }
