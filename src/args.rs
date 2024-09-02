@@ -52,7 +52,7 @@ pub struct Args {
 
     /// Show only n restaurants
     #[arg(short, long)]
-    pub number: Option<u32>,
+    pub number: Option<u16>,
 
     /// Print version
     // Allows both -v and -V short flags to be used instead of just the clap default -V.
@@ -67,7 +67,7 @@ pub struct Args {
     #[arg(short, long)]
     pub url: bool,
 
-    /// Hide closed restaurants
+    /// Hide closed restaurants when searching for todays menus
     #[arg(short, long = "hide-closed")]
     pub hide_closed: bool,
 
