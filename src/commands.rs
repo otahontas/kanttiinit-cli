@@ -1,9 +1,11 @@
 use crate::args::Args;
+use crate::geo::get_location;
 use crate::lang::{get_lang, set_lang};
 
 use crate::output::print_menus;
 use crate::search::{
     filter_menus_and_format_to_restaurants_with_menus, get_menus_by_restaurants,
+    get_restaurants_by_location,
     get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetically,
 };
 
@@ -44,7 +46,7 @@ pub fn handle_arg(args: Args) {
         return;
     }
 
-    // TODO: derive args in commands to have better names
+    // Handle query-based search
     if let Some(query) = args.query {
         match get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetically(
             &query,
@@ -69,5 +71,38 @@ pub fn handle_arg(args: Args) {
         }
     }
 
-    // TODO: add geolocation support
+    // Handle geolocation-based search
+    if let Some(location_query) = args.geo {
+        match get_location(&location_query) {
+            Ok(geo_location) => {
+                match get_restaurants_by_location(
+                    geo_location.latitude,
+                    geo_location.longitude,
+                    &lang,
+                ) {
+                    Ok(restaurants) => {
+                        match get_menus_by_restaurants(&restaurants, &lang, args.day, args.number) {
+                            Ok(menus) => {
+                                let formatted_restaurants =
+                                    filter_menus_and_format_to_restaurants_with_menus(
+                                        &restaurants,
+                                        &menus,
+                                        &args.filter,
+                                    );
+                                print_menus(
+                                    formatted_restaurants,
+                                    args.day,
+                                    args.address,
+                                    args.url,
+                                );
+                            }
+                            Err(e) => println!("Error getting menus: {}", e),
+                        }
+                    }
+                    Err(e) => println!("Error searching by location: {}", e),
+                }
+            }
+            Err(e) => println!("Error geocoding address '{}': {}", location_query, e),
+        }
+    }
 }

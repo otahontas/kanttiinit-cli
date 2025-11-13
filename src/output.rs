@@ -23,11 +23,26 @@ pub fn print_menus(
         return;
     }
     for restaurant in restaurants_with_menus {
-        // TODO: use string builder
+        let distance_str = match restaurant.distance {
+            Some(d) => {
+                if d >= 1000 {
+                    format!(" <dim>{:.1}km</>", d as f64 / 1000.0)
+                } else {
+                    format!(" <dim>{}m</>", d)
+                }
+            }
+            None => String::new(),
+        };
+
         match restaurant.opening_hours {
             Some(todays_opening_hours) => {
                 if day_offset != 0 {
-                    cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
+                    cprintln!(
+                        "<bold>{}</>{} {}",
+                        restaurant.name,
+                        distance_str,
+                        todays_opening_hours
+                    );
                 } else {
                     let opening_hours_split = todays_opening_hours
                         .split('-')
@@ -41,8 +56,9 @@ pub fn print_menus(
                     let current_time = Local::now().time();
                     if current_time > end_time {
                         cprintln!(
-                            "<strong>{}</> <dim>{}</>",
+                            "<strong>{}</>{} <dim>{}</>",
                             restaurant.name,
+                            distance_str,
                             todays_opening_hours
                         );
                     } else {
@@ -53,8 +69,9 @@ pub fn print_menus(
                             closes_in.num_minutes() % 60
                         );
                         cprintln!(
-                            "<bold>{}</> <green>{}</> <dim>closes in {}</>",
+                            "<bold>{}</>{} <green>{}</> <dim>closes in {}</>",
                             restaurant.name,
+                            distance_str,
                             todays_opening_hours,
                             closes_in_formatted
                         );
@@ -62,7 +79,7 @@ pub fn print_menus(
                 }
             }
             None => {
-                cprintln!("<bold>{}</>", restaurant.name);
+                cprintln!("<bold>{}</>{}", restaurant.name, distance_str);
                 continue;
             }
         }
