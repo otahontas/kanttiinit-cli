@@ -10,6 +10,14 @@ pub struct Restaurant {
     name: String,
     url: String,
     address: String,
+    #[serde(default)]
+    distance: Option<u32>,
+}
+
+impl Restaurant {
+    pub fn distance(&self) -> Option<u32> {
+        self.distance
+    }
 }
 
 #[derive(Debug, Deserialize, Clone)]
@@ -67,10 +75,14 @@ pub fn get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetic
                                 start_time_split.last().unwrap().parse::<u32>().unwrap();
                             let end_hour = end_time_split.first().unwrap().parse::<u32>().unwrap();
                             let end_minute = end_time_split.last().unwrap().parse::<u32>().unwrap();
-                            let start_time =
-                                chrono::NaiveTime::from_hms(start_hour, start_minute, 0);
-                            let end_time = chrono::NaiveTime::from_hms(end_hour, end_minute, 0);
-                            start_time <= current_time && current_time <= end_time
+                            if let (Some(start_time), Some(end_time)) = (
+                                chrono::NaiveTime::from_hms_opt(start_hour, start_minute, 0),
+                                chrono::NaiveTime::from_hms_opt(end_hour, end_minute, 0),
+                            ) {
+                                start_time <= current_time && current_time <= end_time
+                            } else {
+                                false
+                            }
                         } else {
                             false
                         }
@@ -86,6 +98,27 @@ pub fn get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetic
         })
         .collect::<Restaurants>();
     restaurants.sort_by(|a, b| a.name.cmp(&b.name));
+    Ok(restaurants)
+}
+
+pub fn get_restaurants_by_location(
+    latitude: f64,
+    longitude: f64,
+    lang: &str,
+) -> Result<Restaurants, anyhow::Error> {
+    let mut restaurants = ureq::get("https://kitchen.kanttiinit.fi/restaurants")
+        .query("lat", &latitude.to_string())
+        .query("lon", &longitude.to_string())
+        .query("lang", lang)
+        .call()?
+        .into_json::<Restaurants>()?;
+    // Sort by distance (closest first)
+    restaurants.sort_by(|a, b| match (a.distance, b.distance) {
+        (Some(d_a), Some(d_b)) => d_a.cmp(&d_b),
+        (Some(_), None) => std::cmp::Ordering::Less,
+        (None, Some(_)) => std::cmp::Ordering::Greater,
+        (None, None) => std::cmp::Ordering::Equal,
+    });
     Ok(restaurants)
 }
 
@@ -145,6 +178,7 @@ pub struct RestaurantWithMenu {
     pub opening_hours: Option<String>,
     pub address: String,
     pub url: String,
+    pub distance: Option<u32>,
     pub formatted_menu_items: Option<Vec<FormattedMenuItem>>,
 }
 
@@ -182,6 +216,7 @@ pub fn filter_menus_and_format_to_restaurants_with_menus(
                 opening_hours: restaurant.opening_hours.first().unwrap_or(&None).clone(),
                 address: restaurant.address.clone(),
                 url: restaurant.url.clone(),
+                distance: restaurant.distance,
                 formatted_menu_items: menu_items,
             }
         })
