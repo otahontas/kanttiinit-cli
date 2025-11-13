@@ -1,8 +1,4 @@
-use std::env::ArgsOs;
-
 use clap::Parser;
-
-// TODO: Colors
 
 /// Kanttiinit.fi command-line interface
 #[derive(Parser, Debug)]
@@ -81,8 +77,10 @@ pub struct Args {
     help: Option<bool>, // handled automatically, no need for pub
 }
 
-// TODO: error handling
-// TODO: tests + generic args for easier testing
-pub fn parse(args: ArgsOs) -> Args {
+pub fn parse<I, T>(args: I) -> Args
+where
+    I: IntoIterator<Item = T>,
+    T: Into<std::ffi::OsString> + Clone,
+{
     Args::parse_from(args)
 }

@@ -1,9 +1,17 @@
 [package]
 name = "kanttiinit"
 version = "0.1.0"
-description = "Kanttiinit.fi command-line interface."
+description = "Command-line interface for browsing restaurant menus from Kanttiinit.fi"
+authors = ["Kanttiinit Contributors"]
 edition = "2021"
+license = "MIT"
+repository = "https://github.com/Kanttiinit/cli"
+homepage = "https://kanttiinit.fi"
+documentation = "https://github.com/Kanttiinit/cli/blob/main/README.md"
+readme = "README.md"
+keywords = ["cli", "restaurant", "menu", "food", "kanttiinit"]
 categories = ["command-line-utilities"]
+rust-version = "1.70"
 
 [lib]
 path = "src/lib.rs"
@@ -21,6 +29,9 @@ serde = { version = "1.0.208", features = ["derive"] }
 toml = "0.8.19"
 ureq = { version = "2.10.1", features = ["json"] }
 xdg = "2.5.2"
+
+[dev-dependencies]
+serde_json = "1.0"
 
 # https://github.com/johnthagen/min-sized-rust
 [profile.release]
