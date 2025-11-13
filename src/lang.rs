@@ -86,3 +86,44 @@ pub fn set_lang(lang_from_user: &str) -> Result<(), anyhow::Error> {
     write!(config_file, "{}", toml).context("Could not write to config file")?;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_lang_from_str_valid() {
+        assert!(matches!(Lang::from_str("fi"), Ok(Lang::Fi)));
+        assert!(matches!(Lang::from_str("en"), Ok(Lang::En)));
+    }
+
+    #[test]
+    fn test_lang_from_str_invalid() {
+        assert!(Lang::from_str("invalid").is_err());
+        assert!(Lang::from_str("").is_err());
+        assert!(Lang::from_str("fr").is_err());
+    }
+
+    #[test]
+    fn test_lang_display() {
+        assert_eq!(Lang::Fi.to_string(), "fi");
+        assert_eq!(Lang::En.to_string(), "en");
+    }
+
+    #[test]
+    fn test_config_serialization() {
+        let config = Config {
+            lang: "en".to_string(),
+        };
+        let toml_str = toml::to_string(&config).unwrap();
+        assert!(toml_str.contains("lang"));
+        assert!(toml_str.contains("en"));
+    }
+
+    #[test]
+    fn test_config_deserialization() {
+        let toml_str = "lang = \"fi\"";
+        let config: Config = toml::from_str(toml_str).unwrap();
+        assert_eq!(config.lang, "fi");
+    }
+}
