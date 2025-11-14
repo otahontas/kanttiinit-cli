@@ -54,11 +54,22 @@ pub fn handle_arg(args: Args) {
             args.hide_closed,
         ) {
             Ok(restaurants) => {
-                match get_menus_by_restaurants(&restaurants, &lang, args.day, args.number) {
+                let limited_restaurants: Vec<_> = match args.number {
+                    Some(limit) => {
+                        let limit_usize = usize::from(limit);
+                        if limit_usize < restaurants.len() {
+                            restaurants[..limit_usize].to_vec()
+                        } else {
+                            restaurants.clone()
+                        }
+                    }
+                    None => restaurants.clone(),
+                };
+                match get_menus_by_restaurants(&limited_restaurants, &lang, args.day, args.number) {
                     Ok(menus) => {
                         let formatted_restaurants =
                             filter_menus_and_format_to_restaurants_with_menus(
-                                &restaurants,
+                                &limited_restaurants,
                                 &menus,
                                 &args.filter,
                             );
@@ -81,11 +92,22 @@ pub fn handle_arg(args: Args) {
                     &lang,
                 ) {
                     Ok(restaurants) => {
-                        match get_menus_by_restaurants(&restaurants, &lang, args.day, args.number) {
+                        let limited_restaurants: Vec<_> = match args.number {
+                            Some(limit) => {
+                                let limit_usize = usize::from(limit);
+                                if limit_usize < restaurants.len() {
+                                    restaurants[..limit_usize].to_vec()
+                                } else {
+                                    restaurants.clone()
+                                }
+                            }
+                            None => restaurants.clone(),
+                        };
+                        match get_menus_by_restaurants(&limited_restaurants, &lang, args.day, args.number) {
                             Ok(menus) => {
                                 let formatted_restaurants =
                                     filter_menus_and_format_to_restaurants_with_menus(
-                                        &restaurants,
+                                        &limited_restaurants,
                                         &menus,
                                         &args.filter,
                                     );

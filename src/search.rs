@@ -2,7 +2,7 @@ use chrono::{Datelike, Local};
 use serde::Deserialize;
 use std::collections::HashMap;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 pub struct Restaurant {
     #[serde(rename = "openingHours")]
     opening_hours: Vec<Option<String>>,
@@ -12,11 +12,25 @@ pub struct Restaurant {
     address: String,
     #[serde(default)]
     distance: Option<u32>,
+    latitude: f64,
+    longitude: f64,
 }
 
 impl Restaurant {
     pub fn distance(&self) -> Option<u32> {
         self.distance
+    }
+
+    pub fn set_distance(&mut self, distance: u32) {
+        self.distance = Some(distance);
+    }
+
+    pub fn latitude(&self) -> f64 {
+        self.latitude
+    }
+
+    pub fn longitude(&self) -> f64 {
+        self.longitude
     }
 }
 
