@@ -1,0 +1,60 @@
+# CodeRabbit Configuration
+# For more information, see: https://docs.coderabbit.ai/getting-started/configure-coderabbit
+
+# Language for pull request reviews
+system_language: "en-US"
+
+# Skip reviewing draft pull requests
+ignore_draft_pr: true
+
+# Generate release notes summary on PRs
+release_notes: true
+
+# Enable experimental features
+enable_beta_features: false
+
+# Disable celebratory poem generation (keep reviews professional)
+disable_poem: true
+
+# Branches to ignore (comma-separated, supports wildcards)
+# Example: "dev/*,test/*"
+ignored_branch: ""
+
+# PR title snippets to exclude from reviews
+# Example: "WIP,DO NOT REVIEW"
+ignored_titles: "WIP"
+
+# Path filters to exclude files from review (glob patterns)
+# The ! prefix means to NOT review these paths
+path_filters: |
+  !*.lock
+  !*.toml
+  !*.md
+  !target/**
+  !.github/**
+
+# Custom instructions for specific file paths
+file_path_instructions:
+  - path: "**/*.rs"
+    instructions: |
+      Review Rust code for:
+      - Idiomatic Rust patterns and best practices
+      - Proper error handling with Result/Option types
+      - Memory safety and borrowing issues
+      - Performance considerations
+      - Code documentation and comments
+      - Test coverage for new functionality
+      - Adherence to clippy lints and rustfmt formatting
+      - Security vulnerabilities (e.g., unsafe code usage)
+
+  - path: "**/Cargo.toml"
+    instructions: |
+      Check dependency versions and security advisories.
+      Ensure proper versioning and feature flags.
+
+  - path: "tests/**/*.rs"
+    instructions: |
+      Review test quality:
+      - Test coverage and edge cases
+      - Clear test names and assertions
+      - Proper use of test fixtures and mocks
