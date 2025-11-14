@@ -12,11 +12,25 @@ pub struct Restaurant {
     address: String,
     #[serde(default)]
     distance: Option<u32>,
+    latitude: f64,
+    longitude: f64,
 }
 
 impl Restaurant {
     pub fn distance(&self) -> Option<u32> {
         self.distance
+    }
+
+    pub fn set_distance(&mut self, distance: u32) {
+        self.distance = Some(distance);
+    }
+
+    pub fn latitude(&self) -> f64 {
+        self.latitude
+    }
+
+    pub fn longitude(&self) -> f64 {
+        self.longitude
     }
 }
 
@@ -106,12 +120,25 @@ pub fn get_restaurants_by_location(
     longitude: f64,
     lang: &str,
 ) -> Result<Restaurants, anyhow::Error> {
+    use crate::geo::GeoLocation;
+
+    let search_location = GeoLocation {
+        latitude,
+        longitude,
+    };
     let mut restaurants = ureq::get("https://kitchen.kanttiinit.fi/restaurants")
         .query("lat", &latitude.to_string())
         .query("lon", &longitude.to_string())
         .query("lang", lang)
         .call()?
         .into_json::<Restaurants>()?;
+
+    // Calculate distance for each restaurant
+    for restaurant in &mut restaurants {
+        let distance = search_location.distance_to(restaurant.latitude(), restaurant.longitude());
+        restaurant.set_distance(distance);
+    }
+
     // Sort by distance (closest first)
     restaurants.sort_by(|a, b| match (a.distance, b.distance) {
         (Some(d_a), Some(d_b)) => d_a.cmp(&d_b),

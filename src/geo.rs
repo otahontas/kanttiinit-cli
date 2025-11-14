@@ -12,6 +12,25 @@ pub struct GeoLocation {
     pub longitude: f64,
 }
 
+impl GeoLocation {
+    /// Calculate distance in meters between two geographic coordinates using Haversine formula
+    pub fn distance_to(&self, other_lat: f64, other_lon: f64) -> u32 {
+        const EARTH_RADIUS_KM: f64 = 6371.0;
+
+        let lat1 = self.latitude.to_radians();
+        let lat2 = other_lat.to_radians();
+        let delta_lat = (other_lat - self.latitude).to_radians();
+        let delta_lon = (other_lon - self.longitude).to_radians();
+
+        let a = (delta_lat / 2.0).sin().powi(2)
+            + lat1.cos() * lat2.cos() * (delta_lon / 2.0).sin().powi(2);
+        let c = 2.0 * a.sqrt().atan2((1.0 - a).sqrt());
+
+        let distance_km = EARTH_RADIUS_KM * c;
+        (distance_km * 1000.0).round() as u32
+    }
+}
+
 /// Get geographic coordinates for an address using OpenStreetMap's Nominatim API
 ///
 /// This is a free geocoding service that doesn't require an API key.
