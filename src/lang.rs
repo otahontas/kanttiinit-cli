@@ -1,10 +1,18 @@
 use anyhow::Context;
-use directories::ProjectDirs;
 use serde::{Deserialize, Serialize};
 use std::fmt;
-use std::fs::{self, File};
+use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+
+#[cfg(unix)]
+use xdg::BaseDirectories;
+
+#[cfg(windows)]
+use directories::ProjectDirs;
+
+#[cfg(windows)]
+use std::fs;
 
 #[derive(Debug)]
 pub enum Lang {
@@ -39,6 +47,14 @@ struct Config {
 const CONFIG_FOLDER_PREFIX: &str = env!("CARGO_PKG_NAME");
 const CONFIG_FILE_NAME: &str = "config.toml";
 
+#[cfg(unix)]
+fn get_config_file_path() -> Result<PathBuf, anyhow::Error> {
+    Ok(BaseDirectories::with_prefix(CONFIG_FOLDER_PREFIX)
+        .context("Could not get base directories")?
+        .get_config_file(CONFIG_FILE_NAME))
+}
+
+#[cfg(windows)]
 fn get_config_file_path() -> Result<PathBuf, anyhow::Error> {
     let proj_dirs = ProjectDirs::from("", "", CONFIG_FOLDER_PREFIX)
         .context("Could not determine project directories")?;
@@ -59,6 +75,15 @@ fn get_config_from_file_or_return_default_config() -> Result<Config, anyhow::Err
     }
 }
 
+#[cfg(unix)]
+fn create_config_directories_and_get_config_file_path() -> Result<PathBuf, anyhow::Error> {
+    BaseDirectories::with_prefix(CONFIG_FOLDER_PREFIX)
+        .context("Could not get base directories")?
+        .place_config_file(CONFIG_FILE_NAME)
+        .context("Could not place config file")
+}
+
+#[cfg(windows)]
 fn create_config_directories_and_get_config_file_path() -> Result<PathBuf, anyhow::Error> {
     let proj_dirs = ProjectDirs::from("", "", CONFIG_FOLDER_PREFIX)
         .context("Could not determine project directories")?;
