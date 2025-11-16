@@ -30,6 +30,9 @@ toml = "0.8.19"
 ureq = { version = "2.10.1", features = ["json"] }
 xdg = "2.5.2"
 
+[target.'cfg(windows)'.dependencies]
+directories = "5.0"
+
 [dev-dependencies]
 serde_json = "1.0"
 
