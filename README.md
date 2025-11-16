@@ -14,15 +14,31 @@ Rust port of [c++ based kanttiinit cli](https://github.com/kanttiinit/cli), a cl
 
 ## Installation
 
-### From GitHub Releases (Recommended)
+### Using Homebrew (macOS/Linux)
 
-Download pre-built binaries for your platform from the [releases page](https://github.com/Kanttiinit/cli/releases).
+```bash
+# Add the tap
+brew tap otahontas/kanttiinit-cli
+
+# Install kanttiinit
+brew install kanttiinit
+```
+
+To upgrade to the latest version:
+```bash
+brew update
+brew upgrade kanttiinit
+```
+
+### From GitHub Releases
+
+Download pre-built binaries for your platform from the [releases page](https://github.com/otahontas/kanttiinit-cli/releases).
 
 ### From source
 
 ```bash
 git clone https://github.com/otahontas/kanttiinit-cli && \
-cd cli && \
+cd kanttiinit-cli && \
 cargo install --path .
 ```
 
