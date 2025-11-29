@@ -12,6 +12,7 @@ readme = "README.md"
 keywords = ["cli", "restaurant", "menu", "food", "kanttiinit"]
 categories = ["command-line-utilities"]
 rust-version = "1.70"
+publish = false
 
 [lib]
 path = "src/lib.rs"
