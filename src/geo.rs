@@ -167,7 +167,10 @@ mod tests {
         let mut server = mockito::Server::new();
         let mock = server
             .mock("GET", "/search")
-            .match_query(mockito::Matcher::UrlEncoded("q".into(), "Otakaari 8".into()))
+            .match_query(mockito::Matcher::UrlEncoded(
+                "q".into(),
+                "Otakaari 8".into(),
+            ))
             .with_status(200)
             .with_header("content-type", "application/json")
             .with_body(r#"[{"lat": "60.1867", "lon": "24.8290"}]"#)
