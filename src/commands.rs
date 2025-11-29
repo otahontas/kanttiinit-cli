@@ -103,7 +103,12 @@ pub fn handle_arg(args: Args) {
                             }
                             None => restaurants.clone(),
                         };
-                        match get_menus_by_restaurants(&limited_restaurants, &lang, args.day, args.number) {
+                        match get_menus_by_restaurants(
+                            &limited_restaurants,
+                            &lang,
+                            args.day,
+                            args.number,
+                        ) {
                             Ok(menus) => {
                                 let formatted_restaurants =
                                     filter_menus_and_format_to_restaurants_with_menus(
