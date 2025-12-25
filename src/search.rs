@@ -26,6 +26,27 @@ type RestaurantIdAsHashMapKey = String;
 type MenusFromApi = HashMap<RestaurantIdAsHashMapKey, DailyMenu>;
 type Menus = HashMap<RestaurantIdAsHashMapKey, MenuItems>;
 
+fn is_restaurant_open_now(opening_hours: &[Option<String>], weekday_index: u32) -> bool {
+    let hours = match opening_hours.get(weekday_index as usize) {
+        Some(Some(h)) => h,
+        _ => return false,
+    };
+    let (start_str, end_str) = match hours.split_once('-') {
+        Some((s, e)) => (s.trim(), e.trim()),
+        None => return false,
+    };
+    let start_time = match chrono::NaiveTime::parse_from_str(start_str, "%H:%M") {
+        Ok(t) => t,
+        Err(_) => return false,
+    };
+    let end_time = match chrono::NaiveTime::parse_from_str(end_str, "%H:%M") {
+        Ok(t) => t,
+        Err(_) => return false,
+    };
+    let now = chrono::Local::now().time();
+    start_time <= now && now <= end_time
+}
+
 pub fn get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetically(
     query: &str,
     lang: &str,
@@ -42,51 +63,10 @@ pub fn get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetic
         .into_json::<Restaurants>()?
         .into_iter()
         .filter(|restaurant| {
-            if hide_closed {
-                let possibly_todays_opening_hours = restaurant
-                    .opening_hours
-                    .get(usize::try_from(current_date_index_in_week).unwrap())
-                    .unwrap(); // TODO: handle
-                if let Some(todays_opening_hours) = possibly_todays_opening_hours {
-                    // TODO: refactor
-                    // opening hours in form of "10:30-14:00"
-                    let opening_hours_split = todays_opening_hours
-                        .split('-')
-                        .map(|s| s.trim())
-                        .collect::<Vec<&str>>();
-                    let possibly_start_time = opening_hours_split.first();
-                    let possibly_end_time = opening_hours_split.last();
-                    let current_time = Local::now().time();
-                    if let Some(start_time) = possibly_start_time {
-                        if let Some(end_time) = possibly_end_time {
-                            let start_time_split = start_time.split(':').collect::<Vec<&str>>();
-                            let end_time_split = end_time.split(':').collect::<Vec<&str>>();
-                            let start_hour =
-                                start_time_split.first().unwrap().parse::<u32>().unwrap();
-                            let start_minute =
-                                start_time_split.last().unwrap().parse::<u32>().unwrap();
-                            let end_hour = end_time_split.first().unwrap().parse::<u32>().unwrap();
-                            let end_minute = end_time_split.last().unwrap().parse::<u32>().unwrap();
-                            if let (Some(start_time), Some(end_time)) = (
-                                chrono::NaiveTime::from_hms_opt(start_hour, start_minute, 0),
-                                chrono::NaiveTime::from_hms_opt(end_hour, end_minute, 0),
-                            ) {
-                                start_time <= current_time && current_time <= end_time
-                            } else {
-                                false
-                            }
-                        } else {
-                            false
-                        }
-                    } else {
-                        false
-                    }
-                } else {
-                    false
-                }
-            } else {
-                true
+            if !hide_closed {
+                return true;
             }
+            is_restaurant_open_now(&restaurant.opening_hours, current_date_index_in_week)
         })
         .collect::<Restaurants>();
     restaurants.sort_by(|a, b| a.name.cmp(&b.name));
