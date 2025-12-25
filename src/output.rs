@@ -28,35 +28,36 @@ pub fn print_menus(
                 if day_offset != 0 {
                     cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
                 } else {
-                    let opening_hours_split = todays_opening_hours
-                        .split('-')
-                        .map(|s| s.trim())
-                        .collect::<Vec<&str>>();
-                    let end_time = chrono::NaiveTime::parse_from_str(
-                        opening_hours_split.last().unwrap(),
-                        "%H:%M",
-                    )
-                    .unwrap();
                     let current_time = Local::now().time();
-                    if current_time > end_time {
-                        cprintln!(
-                            "<strong>{}</> <dim>{}</>",
-                            restaurant.name,
-                            todays_opening_hours
-                        );
-                    } else {
-                        let closes_in = end_time.signed_duration_since(current_time);
-                        let closes_in_formatted = format!(
-                            "{}h {}m",
-                            closes_in.num_hours(),
-                            closes_in.num_minutes() % 60
-                        );
-                        cprintln!(
-                            "<bold>{}</> <green>{}</> <dim>closes in {}</>",
-                            restaurant.name,
-                            todays_opening_hours,
-                            closes_in_formatted
-                        );
+                    let end_time = todays_opening_hours
+                        .split_once('-')
+                        .and_then(|(_, end)| chrono::NaiveTime::parse_from_str(end.trim(), "%H:%M").ok());
+
+                    match end_time {
+                        Some(end_time) if current_time > end_time => {
+                            cprintln!(
+                                "<strong>{}</> <dim>{}</>",
+                                restaurant.name,
+                                todays_opening_hours
+                            );
+                        }
+                        Some(end_time) => {
+                            let closes_in = end_time.signed_duration_since(current_time);
+                            let closes_in_formatted = format!(
+                                "{}h {}m",
+                                closes_in.num_hours(),
+                                closes_in.num_minutes() % 60
+                            );
+                            cprintln!(
+                                "<bold>{}</> <green>{}</> <dim>closes in {}</>",
+                                restaurant.name,
+                                todays_opening_hours,
+                                closes_in_formatted
+                            );
+                        }
+                        None => {
+                            cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
+                        }
                     }
                 }
             }
