@@ -4,6 +4,7 @@ use std::fmt;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
+use std::str::FromStr;
 
 #[cfg(unix)]
 use xdg::BaseDirectories;
@@ -20,8 +21,10 @@ pub enum Lang {
     En,
 }
 
-impl Lang {
-    fn from_str(s: &str) -> Result<Lang, anyhow::Error> {
+impl FromStr for Lang {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
         match s {
             "fi" => Ok(Lang::Fi),
             "en" => Ok(Lang::En),
