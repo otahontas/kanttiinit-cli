@@ -207,7 +207,7 @@ fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restau
 
 ## 5. Implement FromStr trait for Lang
 
-- [ ] Done
+- [x] Done
 
 **Problem:** `lang.rs` has a custom `from_str` method instead of implementing the standard `FromStr` trait.
 
@@ -255,7 +255,7 @@ impl FromStr for Lang {
 
 ## 6. Use if/else instead of match on boolean
 
-- [ ] Done
+- [x] Done
 
 **Problem:** `lang.rs:66-76` uses `match config_path.exists()` with `true`/`false` arms.
 
@@ -297,7 +297,7 @@ if config_path.exists() {
 
 ## 7. Remove unnecessary continue statement
 
-- [ ] Done
+- [x] Done
 
 **Problem:** `output.rs:65` has an unnecessary `continue` as the last statement in a match arm.
 
@@ -328,7 +328,7 @@ None => {
 
 ## 8. Use split_once instead of split().collect()
 
-- [ ] Done
+- [x] Done
 
 **Problem:** Code uses `split('-').collect::<Vec<&str>>()` followed by `.first()` and `.last()` when `split_once` is cleaner.
 
