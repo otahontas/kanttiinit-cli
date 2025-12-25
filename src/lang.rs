@@ -66,15 +66,13 @@ fn get_config_file_path() -> Result<PathBuf, anyhow::Error> {
 
 fn get_config_from_file_or_return_default_config() -> Result<Config, anyhow::Error> {
     let config_path = get_config_file_path().context("Could not get config file path")?;
-    match config_path.exists() {
-        true => {
-            let read_to_string =
-                std::fs::read_to_string(config_path).context("Could not read config file")?;
-            Ok(toml::from_str(&read_to_string).context("Could not parse config file as TOML")?)
-        }
-        false => Ok(Config {
+    if config_path.exists() {
+        let contents = std::fs::read_to_string(config_path).context("Could not read config file")?;
+        Ok(toml::from_str(&contents).context("Could not parse config file as TOML")?)
+    } else {
+        Ok(Config {
             lang: "en".to_string(),
-        }),
+        })
     }
 }
 
