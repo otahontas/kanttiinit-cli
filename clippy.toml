@@ -1,0 +1,5 @@
+# Clippy configuration for kanttiinit-cli
+# More strict linting settings
+
+# Cognitive complexity threshold
+cognitive-complexity-threshold = 25
