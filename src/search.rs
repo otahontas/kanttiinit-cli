@@ -132,24 +132,17 @@ pub fn filter_menus_and_format_to_restaurants_with_menus(
         .map(|restaurant| -> RestaurantWithMenu {
             let menu_id = restaurant.id.to_string();
             let maybe_menu_items = menus.get(&menu_id);
-            let menu_items = match maybe_menu_items {
-                Some(menu_items) => {
-                    let filter = match maybe_filter {
-                        Some(filter_string) => filter_string.clone(),
-                        None => "".to_string(),
-                    };
-                    let menus_items_filtered_by_title = menu_items
-                        .iter()
-                        .filter(|menu_item| menu_item.title.contains(&filter))
-                        .map(|menu_item| FormattedMenuItem {
-                            title: menu_item.title.clone(),
-                            properties: menu_item.properties.join(", "),
-                        })
-                        .collect::<Vec<FormattedMenuItem>>();
-                    Some(menus_items_filtered_by_title)
-                }
-                None => None,
-            };
+            let menu_items = maybe_menu_items.map(|menu_items| {
+                let filter = maybe_filter.as_deref().unwrap_or("");
+                menu_items
+                    .iter()
+                    .filter(|menu_item| menu_item.title.contains(filter))
+                    .map(|menu_item| FormattedMenuItem {
+                        title: menu_item.title.clone(),
+                        properties: menu_item.properties.join(", "),
+                    })
+                    .collect::<Vec<FormattedMenuItem>>()
+            });
             RestaurantWithMenu {
                 name: restaurant.name.clone(),
                 opening_hours: restaurant.opening_hours.first().unwrap_or(&None).clone(),
