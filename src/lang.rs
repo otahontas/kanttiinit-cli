@@ -67,7 +67,8 @@ fn get_config_file_path() -> Result<PathBuf, anyhow::Error> {
 fn get_config_from_file_or_return_default_config() -> Result<Config, anyhow::Error> {
     let config_path = get_config_file_path().context("Could not get config file path")?;
     if config_path.exists() {
-        let contents = std::fs::read_to_string(config_path).context("Could not read config file")?;
+        let contents =
+            std::fs::read_to_string(config_path).context("Could not read config file")?;
         Ok(toml::from_str(&contents).context("Could not parse config file as TOML")?)
     } else {
         Ok(Config {
@@ -144,7 +145,7 @@ mod tests {
         let config = Config {
             lang: "en".to_string(),
         };
-        let toml_str = toml::to_string(&config).unwrap();
+        let toml_str = toml::to_string(&config).expect("serialization should succeed");
         assert!(toml_str.contains("lang"));
         assert!(toml_str.contains("en"));
     }
@@ -152,7 +153,7 @@ mod tests {
     #[test]
     fn test_config_deserialization() {
         let toml_str = "lang = \"fi\"";
-        let config: Config = toml::from_str(toml_str).unwrap();
+        let config: Config = toml::from_str(toml_str).expect("deserialization should succeed");
         assert_eq!(config.lang, "fi");
     }
 }

@@ -20,11 +20,9 @@ pub struct MenuItem {
 
 type Restaurants = Vec<Restaurant>;
 type MenuItems = Vec<MenuItem>;
-type MenuDate = String;
-type DailyMenu = HashMap<MenuDate, MenuItems>;
-type RestaurantIdAsHashMapKey = String;
-type MenusFromApi = HashMap<RestaurantIdAsHashMapKey, DailyMenu>;
-type Menus = HashMap<RestaurantIdAsHashMapKey, MenuItems>;
+type DailyMenu = HashMap<String, MenuItems>;
+type MenusFromApi = HashMap<String, DailyMenu>;
+type Menus = HashMap<String, MenuItems>;
 
 fn is_restaurant_open_now(opening_hours: &[Option<String>], weekday_index: u32) -> bool {
     let hours = match opening_hours.get(weekday_index as usize) {
@@ -47,7 +45,7 @@ fn is_restaurant_open_now(opening_hours: &[Option<String>], weekday_index: u32) 
     start_time <= now && now <= end_time
 }
 
-pub fn get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetically(
+pub fn get_restaurants(
     query: &str,
     lang: &str,
     hide_closed: bool,
@@ -73,7 +71,7 @@ pub fn get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetic
     Ok(restaurants)
 }
 
-pub fn get_menus_by_restaurants(
+pub fn get_menus(
     restaurants: &[Restaurant],
     lang: &str,
     day_offset: i32,
@@ -122,34 +120,33 @@ pub struct RestaurantWithMenu {
 }
 
 // TODO: format opening_hours properly
-pub fn filter_menus_and_format_to_restaurants_with_menus(
+pub fn format_restaurants_with_menus(
     restaurants: &[Restaurant],
     menus: &Menus,
     maybe_filter: &Option<String>,
 ) -> Vec<RestaurantWithMenu> {
+    let filter = maybe_filter.as_deref().unwrap_or_default();
     restaurants
         .iter()
-        .map(|restaurant| -> RestaurantWithMenu {
+        .map(|restaurant| {
             let menu_id = restaurant.id.to_string();
-            let maybe_menu_items = menus.get(&menu_id);
-            let menu_items = maybe_menu_items.map(|menu_items| {
-                let filter = maybe_filter.as_deref().unwrap_or("");
-                menu_items
+            let formatted_menu_items = menus.get(&menu_id).map(|items| {
+                items
                     .iter()
-                    .filter(|menu_item| menu_item.title.contains(filter))
-                    .map(|menu_item| FormattedMenuItem {
-                        title: menu_item.title.clone(),
-                        properties: menu_item.properties.join(", "),
+                    .filter(|item| item.title.contains(filter))
+                    .map(|item| FormattedMenuItem {
+                        title: item.title.clone(),
+                        properties: item.properties.join(", "),
                     })
-                    .collect::<Vec<FormattedMenuItem>>()
+                    .collect()
             });
             RestaurantWithMenu {
                 name: restaurant.name.clone(),
-                opening_hours: restaurant.opening_hours.first().unwrap_or(&None).clone(),
+                opening_hours: restaurant.opening_hours.first().cloned().flatten(),
                 address: restaurant.address.clone(),
                 url: restaurant.url.clone(),
-                formatted_menu_items: menu_items,
+                formatted_menu_items,
             }
         })
-        .collect::<Vec<RestaurantWithMenu>>()
+        .collect()
 }
