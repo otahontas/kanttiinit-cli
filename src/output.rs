@@ -29,9 +29,9 @@ pub fn print_menus(
                     cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
                 } else {
                     let current_time = Local::now().time();
-                    let end_time = todays_opening_hours
-                        .split_once('-')
-                        .and_then(|(_, end)| chrono::NaiveTime::parse_from_str(end.trim(), "%H:%M").ok());
+                    let end_time = todays_opening_hours.split_once('-').and_then(|(_, end)| {
+                        chrono::NaiveTime::parse_from_str(end.trim(), "%H:%M").ok()
+                    });
 
                     match end_time {
                         Some(end_time) if current_time > end_time => {
