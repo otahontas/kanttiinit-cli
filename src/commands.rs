@@ -7,18 +7,11 @@ use crate::search::{
     get_restaurants_by_query_filtered_by_closed_status_and_ordered_alphabetically, Restaurant,
 };
 
-fn limit_restaurants(restaurants: &[Restaurant], maybe_limit: Option<u16>) -> &[Restaurant] {
-    match maybe_limit {
-        Some(limit) => {
-            let limit_usize = usize::from(limit);
-            if limit_usize < restaurants.len() {
-                &restaurants[..limit_usize]
-            } else {
-                restaurants
-            }
-        }
-        None => restaurants,
-    }
+fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restaurant] {
+    limit.map_or(restaurants, |n| {
+        let n = usize::from(n);
+        &restaurants[..n.min(restaurants.len())]
+    })
 }
 
 pub fn handle_arg(args: Args) {
