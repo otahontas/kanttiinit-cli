@@ -63,7 +63,6 @@ pub fn print_menus(
             }
             None => {
                 cprintln!("<bold>{}</>", restaurant.name);
-                continue;
             }
         }
         if print_address {
