@@ -15,6 +15,9 @@ use directories::ProjectDirs;
 #[cfg(windows)]
 use std::fs;
 
+// Single source of truth for available languages
+pub const AVAILABLE_LANGS: &[&str] = &["fi", "en"];
+
 #[derive(Debug)]
 pub enum Lang {
     Fi,
@@ -28,7 +31,11 @@ impl FromStr for Lang {
         match s {
             "fi" => Ok(Lang::Fi),
             "en" => Ok(Lang::En),
-            _ => Err(anyhow::anyhow!("Invalid language value: {}", s)),
+            _ => Err(anyhow::anyhow!(
+                "Invalid language value: {}. Available languages: {}",
+                s,
+                AVAILABLE_LANGS.join(", ")
+            )),
         }
     }
 }
@@ -155,5 +162,19 @@ mod tests {
         let toml_str = "lang = \"fi\"";
         let config: Config = toml::from_str(toml_str).expect("deserialization should succeed");
         assert_eq!(config.lang, "fi");
+    }
+
+    #[test]
+    fn test_available_langs_const() {
+        assert_eq!(AVAILABLE_LANGS, &["fi", "en"]);
+    }
+
+    #[test]
+    fn test_lang_from_str_invalid_shows_available() {
+        let result = Lang::from_str("fr");
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        assert!(err.to_string().contains("Available languages"));
+        assert!(err.to_string().contains("fi, en"));
     }
 }
