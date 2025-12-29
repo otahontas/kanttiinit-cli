@@ -345,4 +345,138 @@ mod tests {
         // Friday: "25:00-26:00" - invalid times, should return false
         assert!(!is_restaurant_open_now(hours, 4));
     }
+
+    // Integration tests with real API fixtures
+    // These verify that our deserializers can handle actual API responses
+
+    #[test]
+    fn test_deserialize_otaniemi_restaurants_from_api() {
+        let json = include_str!("test_fixtures/otaniemi_restaurants.json");
+        let restaurants: Restaurants = serde_json::from_str(json)
+            .expect("Failed to deserialize otaniemi restaurants from real API response");
+
+        // Should have multiple restaurants
+        assert!(!restaurants.is_empty(), "Should have at least one restaurant");
+
+        // Verify all restaurants have required fields matching our Restaurant struct
+        for restaurant in &restaurants {
+            assert!(!restaurant.name.is_empty(), "Restaurant name should not be empty");
+            assert!(!restaurant.url.is_empty(), "Restaurant URL should not be empty");
+            assert!(!restaurant.address.is_empty(), "Restaurant address should not be empty");
+            assert_eq!(
+                restaurant.opening_hours.len(),
+                7,
+                "Should have 7 days of opening hours"
+            );
+        }
+    }
+
+    #[test]
+    fn test_deserialize_otaniemi_menus_from_api() {
+        let json = include_str!("test_fixtures/otaniemi_menus.json");
+        let menus: MenusFromApi = serde_json::from_str(json)
+            .expect("Failed to deserialize otaniemi menus from real API response");
+
+        // Verify structure matches our MenusFromApi type
+        assert!(!menus.is_empty(), "Menus should not be empty");
+
+        // Check that we can access nested data
+        for (restaurant_id, daily_menus) in &menus {
+            assert!(!restaurant_id.is_empty(), "Restaurant ID should not be empty");
+
+            for (date, items) in daily_menus {
+                // Date should be in YYYY-MM-DD format
+                assert!(date.contains('-'), "Date should be in YYYY-MM-DD format");
+
+                // Verify menu items match our MenuItem struct
+                for item in items {
+                    assert!(!item.title.is_empty(), "Menu item title should not be empty");
+                    // Properties can be empty (it's a Vec, not Option)
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_deserialize_keskusta_restaurants_from_api() {
+        let json = include_str!("test_fixtures/keskusta_restaurants.json");
+        let restaurants: Restaurants = serde_json::from_str(json)
+            .expect("Failed to deserialize keskusta restaurants from real API response");
+
+        // Should have multiple restaurants
+        assert!(!restaurants.is_empty(), "Should have at least one restaurant");
+
+        // Verify all restaurants have required fields
+        for restaurant in &restaurants {
+            assert!(!restaurant.name.is_empty(), "Restaurant name should not be empty");
+            assert!(!restaurant.url.is_empty(), "Restaurant URL should not be empty");
+            assert!(!restaurant.address.is_empty(), "Restaurant address should not be empty");
+            assert_eq!(
+                restaurant.opening_hours.len(),
+                7,
+                "Should have 7 days of opening hours"
+            );
+        }
+    }
+
+    #[test]
+    fn test_deserialize_keskusta_menus_from_api() {
+        let json = include_str!("test_fixtures/keskusta_menus.json");
+        let menus: MenusFromApi = serde_json::from_str(json)
+            .expect("Failed to deserialize keskusta menus from real API response");
+
+        // Verify structure is correct
+        assert!(!menus.is_empty(), "Menus should not be empty");
+
+        // Check nested structure
+        for (restaurant_id, daily_menus) in &menus {
+            assert!(!restaurant_id.is_empty(), "Restaurant ID should not be empty");
+
+            for (date, items) in daily_menus {
+                assert!(date.contains('-'), "Date should be in YYYY-MM-DD format");
+
+                for item in items {
+                    assert!(!item.title.is_empty(), "Menu item title should not be empty");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn test_api_responses_handle_empty_menus() {
+        let json = include_str!("test_fixtures/otaniemi_menus.json");
+        let menus: MenusFromApi = serde_json::from_str(json)
+            .expect("Failed to deserialize otaniemi menus");
+
+        // Some restaurants should have empty menus (closed during holidays)
+        let has_empty = menus
+            .values()
+            .any(|daily_menus| daily_menus.values().any(|items| items.is_empty()));
+
+        assert!(
+            has_empty,
+            "Real API data should include restaurants with empty menus"
+        );
+    }
+
+    #[test]
+    fn test_api_responses_handle_closure_messages() {
+        let json = include_str!("test_fixtures/otaniemi_menus.json");
+        let menus: MenusFromApi = serde_json::from_str(json)
+            .expect("Failed to deserialize otaniemi menus");
+
+        // Some restaurants have closure messages as menu items
+        let has_closure_message = menus.values().any(|daily_menus| {
+            daily_menus.values().any(|items| {
+                items
+                    .iter()
+                    .any(|item| item.title.contains("closed") || item.title.contains("Christmas"))
+            })
+        });
+
+        assert!(
+            has_closure_message,
+            "Real API data should include closure messages"
+        );
+    }
 }

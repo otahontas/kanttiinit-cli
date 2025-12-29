@@ -8,7 +8,6 @@ use crate::lang::AVAILABLE_LANGS;
     version,
     long_about = None,
     arg_required_else_help = true,
-    disable_help_flag = true, // -h is used to hide restaurants
     disable_version_flag = true, // replace with custom setup that allows both -v and -V
     after_help = "Get all restaurants in a specific area:
 kanttiinit -q otaniemi
@@ -52,7 +51,7 @@ pub struct Args {
     pub url: bool,
 
     /// Hide closed restaurants when searching for todays menus
-    #[arg(short, long = "hide-closed")] // todo: remove short
+    #[arg(long = "hide-closed")]
     pub hide_closed: bool,
 
     // TODO: add hide no menu
@@ -60,10 +59,6 @@ pub struct Args {
     /// Save the preferred language
     #[arg(long = "set-lang", value_parser = PossibleValuesParser::new(AVAILABLE_LANGS))]
     pub set_lang: Option<String>,
-
-    /// Display help
-    #[arg(long, action = clap::ArgAction::HelpLong)] // TODO: make short work
-    help: Option<bool>, // handled automatically, no need for pub
 }
 
 pub fn parse<I, T>(args: I) -> Args
@@ -120,7 +115,7 @@ mod tests {
 
     #[test]
     fn test_args_parsing_with_flags() {
-        let args = make_args(&["kanttiinit", "-q", "otaniemi", "-a", "-u", "-h"]);
+        let args = make_args(&["kanttiinit", "-q", "otaniemi", "-a", "-u", "--hide-closed"]);
         let parsed = parse(args);
         assert!(parsed.address);
         assert!(parsed.url);

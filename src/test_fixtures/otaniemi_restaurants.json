@@ -1,0 +1,211 @@
+[
+  {
+    "openingHours": [
+      "10:30 - 15:00",
+      "10:30 - 15:00",
+      "10:30 - 15:00",
+      "10:30 - 15:00",
+      "10:30 - 15:00",
+      null,
+      null
+    ],
+    "id": 3,
+    "type": "https://api.kanttiinit.fi/images/taffa.png",
+    "name": "Täffä",
+    "url": "https://www.teknologforeningen.fi",
+    "latitude": 60.1860346900454,
+    "longitude": 24.8327559092621,
+    "address": "Otakaari 22, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      null,
+      null
+    ],
+    "id": 7,
+    "type": "https://api.kanttiinit.fi/images/amica.jpg",
+    "name": "TUAS",
+    "url": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/tuas-aalto-yliopisto/",
+    "latitude": 60.186832,
+    "longitude": 24.819056,
+    "address": "Maarintie 8, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      null,
+      null
+    ],
+    "id": 41,
+    "type": "",
+    "name": "Mau-kas",
+    "url": "https://www.mau-kas.fi/",
+    "latitude": 60.1829069718667,
+    "longitude": 24.8280072212219,
+    "address": "Vuorimiehentie 5, 02150 Espoo",
+    "priceCategory": "studentPremium"
+  },
+  {
+    "openingHours": [
+      "10:30 - 18:00",
+      "10:30 - 18:00",
+      "10:30 - 18:00",
+      "10:30 - 18:00",
+      "10:30 - 18:00",
+      null,
+      null
+    ],
+    "id": 2,
+    "type": "https://api.kanttiinit.fi/images/sodexo.png",
+    "name": "Computer Science Building",
+    "url": "https://www.sodexo.fi/ravintolat/espoo/aalto-tietotekniikantalo",
+    "latitude": 60.1868583582991,
+    "longitude": 24.821813922615,
+    "address": "Konemiehentie 2, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      null,
+      null
+    ],
+    "id": 1,
+    "type": "",
+    "name": "Kvarkki",
+    "url": "https://www.sodexo.fi/ravintolat/espoo/aalto-kvarkki",
+    "latitude": 60.188348,
+    "longitude": 24.829876,
+    "address": "Otakaari 3, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "11:00 - 14:30",
+      "11:00 - 14:30",
+      "11:00 - 14:30",
+      "11:00 - 14:30",
+      "11:00 - 14:30",
+      null,
+      null
+    ],
+    "id": 5,
+    "type": "https://api.kanttiinit.fi/images/amica.jpg",
+    "name": "Alvari",
+    "url": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/alvari/",
+    "latitude": 60.185952,
+    "longitude": 24.827041,
+    "address": "Otakaari 1 D, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "11:00 - 14:00",
+      "11:00 - 14:00",
+      "11:00 - 14:00",
+      "11:00 - 14:00",
+      "11:00 - 14:00",
+      null,
+      null
+    ],
+    "id": 59,
+    "type": null,
+    "name": "Arvo",
+    "url": "https://www.sodexo.fi/ravintolat/espoo/arvo",
+    "latitude": 60.1860704863956,
+    "longitude": 24.8222194469451,
+    "address": "Ekonominaukio 1, 02150 Espoo",
+    "priceCategory": "studentPremium"
+  },
+  {
+    "openingHours": [
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      null,
+      null
+    ],
+    "id": 50,
+    "type": "",
+    "name": "Kipsari Väre",
+    "url": "http://kipsari.com/",
+    "latitude": 60.1857562712079,
+    "longitude": 24.8244068809509,
+    "address": "Otaniementie 14, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "11:00 - 18:00",
+      "11:00 - 18:00",
+      "11:00 - 18:00",
+      "11:00 - 18:00",
+      "11:00 - 18:00",
+      "11:00 - 16:00",
+      "11:00 - 16:00"
+    ],
+    "id": 52,
+    "type": "",
+    "name": "A Bloc",
+    "url": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/a-bloc/",
+    "latitude": 60.1856008,
+    "longitude": 24.8234719,
+    "address": "Otaniementie 12, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      "11:00 - 15:00",
+      null,
+      null
+    ],
+    "id": 45,
+    "type": "",
+    "name": "Dipoli Restaurants",
+    "url": "https://www.compass-group.fi/ravintolat-ja-ruokalistat/foodco/kaupungit/espoo/dipoli-ravintolat/",
+    "latitude": 60.1850107138939,
+    "longitude": 24.832212638237,
+    "address": "Otakaari 24, 02150 Espoo",
+    "priceCategory": "student"
+  },
+  {
+    "openingHours": [
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      "10:30 - 14:00",
+      null,
+      null
+    ],
+    "id": 73,
+    "type": null,
+    "name": "Mau-kas Nova",
+    "url": "https://www.mau-kas.fi/nova",
+    "latitude": 60.1847257,
+    "longitude": 24.8171495,
+    "address": "Tietotie 3, 02150 Espoo",
+    "priceCategory": "studentPremium"
+  }
+]
