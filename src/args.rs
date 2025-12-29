@@ -2,14 +2,7 @@ use clap::Parser;
 use clap::builder::PossibleValuesParser;
 use crate::lang::AVAILABLE_LANGS;
 
-#[derive(Parser, Debug)]
-#[command(
-    about,
-    version,
-    long_about = None,
-    arg_required_else_help = true,
-    disable_version_flag = true, // replace with custom setup that allows both -v and -V
-    after_help = "Get all restaurants in a specific area:
+const AFTER_HELP: &str = "Get all restaurants in a specific area:
 kanttiinit -q otaniemi
 
 Get restaurants by restaurant name:
@@ -19,14 +12,23 @@ Only list courses that match a certain keyword:
 kanttiinit -q töölö -f salad
 
 See menus for tomorrow:
-kanttiinit -q alvari -d 1"
+kanttiinit -q alvari -d 1";
+
+#[derive(Parser, Debug)]
+#[command(
+    about,
+    version,
+    long_about = None,
+    arg_required_else_help = true,
+    disable_version_flag = true, // replace with custom setup that allows both -v and -V
+    after_help = AFTER_HELP
 )]
 pub struct Args {
-    /// Search restaurants by restaurant or area name
+    /// Search restaurants by restaurant or area name (e.g. otaniemi, kumpula, kaivopiha)
     #[arg(short, long)]
     pub query: Option<String>,
 
-    /// Specify day
+    /// Specify day (0=today, 1=tomorrow, -1=yesterday, etc.)
     #[arg(short, long, default_value_t = 0, allow_hyphen_values = true)]
     pub day: i32,
 
@@ -34,7 +36,7 @@ pub struct Args {
     #[arg(short, long)]
     pub filter: Option<String>,
 
-/// Show first n restaurants
+    /// Show first n restaurants
     #[arg(short, long)]
     pub number: Option<u16>,
 
@@ -42,11 +44,11 @@ pub struct Args {
     #[arg(short = 'v', short_alias = 'V', long, action = clap::builder::ArgAction::Version)]
     version: (), // handled automatically, no need for pub here
 
-    /// Show restaurant address
+    /// Show restaurant address in the output
     #[arg(short, long)]
     pub address: bool,
 
-    /// Show restaurant URL
+    /// Show restaurant URL in the output
     #[arg(short, long)]
     pub url: bool,
 
