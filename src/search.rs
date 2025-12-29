@@ -6,7 +6,7 @@ use std::collections::HashMap;
 pub struct Restaurant {
     #[serde(rename = "openingHours")]
     opening_hours: Vec<Option<String>>,
-    id: u8,
+    pub id: u8,
     name: String,
     url: String,
     address: String,

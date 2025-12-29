@@ -37,8 +37,8 @@ pub struct Args {
     pub filter: Option<String>,
 
     /// Show first n restaurants
-    #[arg(short, long)]
-    pub number: Option<u16>,
+    #[arg(short = 'n', long)]
+    pub head: Option<u16>,
 
     /// Print version
     #[arg(short = 'v', short_alias = 'V', long, action = clap::builder::ArgAction::Version)]
@@ -56,7 +56,9 @@ pub struct Args {
     #[arg(long = "hide-closed")]
     pub hide_closed: bool,
 
-    // TODO: add hide no menu
+    /// Hide restaurants without menu when searching for todays menus
+    #[arg(long = "hide-no-menu")]
+    pub hide_no_menu: bool,
 
     /// Save the preferred language
     #[arg(long = "set-lang", value_parser = PossibleValuesParser::new(AVAILABLE_LANGS))]
@@ -109,10 +111,10 @@ mod tests {
     }
 
     #[test]
-    fn test_args_parsing_with_number() {
+    fn test_args_parsing_with_head() {
         let args = make_args(&["kanttiinit", "-q", "otaniemi", "-n", "5"]);
         let parsed = parse(args);
-        assert_eq!(parsed.number, Some(5));
+        assert_eq!(parsed.head, Some(5));
     }
 
     #[test]
@@ -122,6 +124,13 @@ mod tests {
         assert!(parsed.address);
         assert!(parsed.url);
         assert!(parsed.hide_closed);
+    }
+
+    #[test]
+    fn test_args_parsing_with_hide_no_menu() {
+        let args = make_args(&["kanttiinit", "-q", "otaniemi", "--hide-no-menu"]);
+        let parsed = parse(args);
+        assert!(parsed.hide_no_menu);
     }
 
     #[test]
@@ -137,10 +146,11 @@ mod tests {
         let parsed = parse(args);
         assert_eq!(parsed.day, 0);
         assert_eq!(parsed.filter, None);
-        assert_eq!(parsed.number, None);
+        assert_eq!(parsed.head, None);
         assert!(!parsed.address);
         assert!(!parsed.url);
         assert!(!parsed.hide_closed);
+        assert!(!parsed.hide_no_menu);
         assert_eq!(parsed.set_lang, None);
     }
 }
