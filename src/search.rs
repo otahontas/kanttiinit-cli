@@ -142,11 +142,13 @@ pub fn get_menus(
         ))
 }
 
+#[derive(PartialEq, Debug)]
 pub struct FormattedMenuItem {
     pub title: String,
     pub properties: String,
 }
 
+#[derive(PartialEq, Debug)]
 pub struct RestaurantWithMenu {
     pub name: String,
     pub opening_hours: Option<String>,
@@ -161,7 +163,7 @@ pub fn format_restaurants_with_menus(
     menus: &Menus,
     maybe_filter: &Option<String>,
 ) -> Vec<RestaurantWithMenu> {
-    let filter = maybe_filter.as_deref().unwrap_or_default();
+    let filter = maybe_filter.as_deref().unwrap_or_default().to_lowercase();
     restaurants
         .iter()
         .map(|restaurant| {
@@ -169,7 +171,7 @@ pub fn format_restaurants_with_menus(
             let formatted_menu_items = menus.get(&menu_id).map(|items| {
                 items
                     .iter()
-                    .filter(|item| item.title.contains(filter))
+                    .filter(|item| item.title.to_lowercase().contains(&filter))
                     .map(|item| FormattedMenuItem {
                         title: item.title.clone(),
                         properties: item.properties.join(", "),
@@ -282,6 +284,41 @@ mod tests {
                 assert!(items.is_empty());
             }
         }
+    }
+
+    #[test]
+    fn test_format_restaurants_with_menus_filter_case_insensitive() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let menus = test_fixtures::sample_menus();
+
+        // Test with lowercase filter
+        let result_lower = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("salad".to_string()),
+        );
+
+        // Test with uppercase filter
+        let result_upper = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("SALAD".to_string()),
+        );
+
+        // Test with mixed case filter
+        let result_mixed = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("SaLaD".to_string()),
+        );
+
+        // All three should match the same item "Chicken salad"
+        assert_eq!(result_lower, result_upper);
+        assert_eq!(result_lower, result_mixed);
+
+        let menu_items = result_lower[0].formatted_menu_items.as_ref().unwrap();
+        assert_eq!(menu_items.len(), 1);
+        assert_eq!(menu_items[0].title, "Chicken salad");
     }
 
     #[test]

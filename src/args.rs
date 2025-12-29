@@ -30,7 +30,7 @@ pub struct Args {
     #[arg(short, long, default_value_t = 0, allow_hyphen_values = true)]
     pub day: i32,
 
-    /// Filter courses by keyword TODO: make case insensitive
+    /// Filter courses by keyword (case insensitive)
     #[arg(short, long)]
     pub filter: Option<String>,
 
