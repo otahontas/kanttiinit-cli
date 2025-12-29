@@ -12,10 +12,46 @@ pub struct Restaurant {
     address: String,
 }
 
+impl Restaurant {
+    #[cfg(test)]
+    pub fn new(
+        id: u8,
+        name: String,
+        url: String,
+        address: String,
+        opening_hours: Vec<Option<String>>,
+    ) -> Self {
+        Self {
+            id,
+            name,
+            url,
+            address,
+            opening_hours,
+        }
+    }
+
+    #[cfg(test)]
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    #[cfg(test)]
+    pub fn opening_hours(&self) -> &[Option<String>] {
+        &self.opening_hours
+    }
+}
+
 #[derive(Debug, Deserialize, Clone)]
 pub struct MenuItem {
     title: String,
     properties: Vec<String>,
+}
+
+impl MenuItem {
+    #[cfg(test)]
+    pub fn new(title: String, properties: Vec<String>) -> Self {
+        Self { title, properties }
+    }
 }
 
 type Restaurants = Vec<Restaurant>;
@@ -149,4 +185,164 @@ pub fn format_restaurants_with_menus(
             }
         })
         .collect()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_fixtures;
+
+    // Tests for is_restaurant_open_now
+
+    #[test]
+    fn test_is_restaurant_open_now_returns_false_for_empty_hours() {
+        let hours: Vec<Option<String>> = vec![];
+        assert!(!is_restaurant_open_now(&hours, 0));
+    }
+
+    #[test]
+    fn test_is_restaurant_open_now_returns_false_for_none_on_weekday() {
+        let hours = vec![None, Some("10:00-14:00".to_string())];
+        assert!(!is_restaurant_open_now(&hours, 0)); // Monday is None
+    }
+
+    #[test]
+    fn test_is_restaurant_open_now_returns_false_for_weekday_out_of_bounds() {
+        let hours = vec![Some("10:00-14:00".to_string())];
+        assert!(!is_restaurant_open_now(&hours, 7)); // Only Monday exists
+    }
+
+    #[test]
+    fn test_is_restaurant_open_now_returns_false_for_malformed_hours_no_dash() {
+        let hours = vec![Some("1000".to_string())];
+        assert!(!is_restaurant_open_now(&hours, 0));
+    }
+
+    #[test]
+    fn test_is_restaurant_open_now_returns_false_for_invalid_start_time() {
+        let hours = vec![Some("invalid-14:00".to_string())];
+        assert!(!is_restaurant_open_now(&hours, 0));
+    }
+
+    #[test]
+    fn test_is_restaurant_open_now_returns_false_for_invalid_end_time() {
+        let hours = vec![Some("10:00-invalid".to_string())];
+        assert!(!is_restaurant_open_now(&hours, 0));
+    }
+
+    // Tests for format_restaurants_with_menus
+
+    #[test]
+    fn test_format_restaurants_with_menus_basic() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let menus = test_fixtures::sample_menus();
+
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+
+        assert_eq!(result.len(), 3);
+        assert_eq!(result[0].name, "Aalto Yliopiston ravintola");
+        assert_eq!(result[0].address, "Otakaari 1, Espoo");
+        assert_eq!(result[0].url, "https://example.com/aalto");
+        assert_eq!(result[0].opening_hours, Some("10:30-13:30".to_string()));
+
+        let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
+        assert_eq!(menu_items.len(), 3);
+        assert_eq!(menu_items[0].title, "Lohikeitto");
+        assert_eq!(menu_items[0].properties, "G, L");
+    }
+
+    #[test]
+    fn test_format_restaurants_with_menus_with_filter() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let menus = test_fixtures::sample_menus();
+
+        let result =
+            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()));
+
+        // First restaurant should only have "Chicken salad"
+        let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
+        assert_eq!(menu_items.len(), 1);
+        assert_eq!(menu_items[0].title, "Chicken salad");
+    }
+
+    #[test]
+    fn test_format_restaurants_with_menus_filter_matches_nothing() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let menus = test_fixtures::sample_menus();
+
+        let result = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("nonexistent_food".to_string()),
+        );
+
+        // All restaurants should have empty menu items after filtering
+        for r in &result {
+            if let Some(items) = &r.formatted_menu_items {
+                assert!(items.is_empty());
+            }
+        }
+    }
+
+    #[test]
+    fn test_format_restaurants_with_menus_no_menu_for_restaurant() {
+        let restaurants = vec![test_fixtures::restaurant_without_hours()];
+        let menus = test_fixtures::empty_menus();
+
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+
+        assert_eq!(result.len(), 1);
+        assert_eq!(result[0].name, "Mystery Restaurant");
+        assert!(result[0].formatted_menu_items.is_none());
+    }
+
+    #[test]
+    fn test_format_restaurants_with_menus_empty_opening_hours() {
+        let restaurants = vec![test_fixtures::restaurant_without_hours()];
+        let menus = test_fixtures::sample_menus();
+
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+
+        assert_eq!(result.len(), 1);
+        assert!(result[0].opening_hours.is_none());
+    }
+
+    #[test]
+    fn test_format_restaurants_with_menus_properties_joined() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let menus = test_fixtures::sample_menus();
+
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+
+        // Check that properties are properly joined with ", "
+        let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
+        assert!(menu_items[0].properties.contains(", "));
+    }
+
+    #[test]
+    fn test_format_restaurants_with_menus_empty_restaurants() {
+        let restaurants: Vec<Restaurant> = vec![];
+        let menus = test_fixtures::sample_menus();
+
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_is_restaurant_open_now_handles_malformed_hours_gracefully() {
+        let restaurant = test_fixtures::restaurant_with_malformed_hours();
+        let hours = restaurant.opening_hours();
+
+        // Monday: "invalid" - should return false
+        assert!(!is_restaurant_open_now(hours, 0));
+        // Tuesday: "10:00" - missing end time, should return false
+        assert!(!is_restaurant_open_now(hours, 1));
+        // Wednesday: "10:00-" - empty end time, should return false
+        assert!(!is_restaurant_open_now(hours, 2));
+        // Thursday: "-14:00" - empty start time, should return false
+        assert!(!is_restaurant_open_now(hours, 3));
+        // Friday: "25:00-26:00" - invalid times, should return false
+        assert!(!is_restaurant_open_now(hours, 4));
+    }
 }
