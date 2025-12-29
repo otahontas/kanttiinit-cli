@@ -1,9 +1,7 @@
 use crate::args::Args;
 use crate::lang::{get_lang, set_lang};
 use crate::output::print_menus;
-use crate::search::{
-    format_restaurants_with_menus, get_menus, get_restaurants, Restaurant,
-};
+use crate::search::{format_restaurants_with_menus, get_menus, get_restaurants, Restaurant};
 
 fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restaurant] {
     limit.map_or(restaurants, |n| {
@@ -12,11 +10,7 @@ fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restau
     })
 }
 
-fn handle_query(
-    query: &str,
-    lang: &str,
-    args: &Args,
-) -> Result<(), anyhow::Error> {
+fn handle_query(query: &str, lang: &str, args: &Args) -> Result<(), anyhow::Error> {
     let restaurants = get_restaurants(query, lang, args.hide_closed)?;
     let limited = limit_restaurants(&restaurants, args.number);
     let menus = get_menus(limited, lang, args.day)?;
@@ -56,5 +50,61 @@ pub fn handle_arg(args: Args) {
         if let Err(e) = handle_query(query, &lang, &args) {
             eprintln!("Error: {}", e);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::test_fixtures;
+
+    #[test]
+    fn test_limit_restaurants_with_none_returns_all() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let result = limit_restaurants(&restaurants, None);
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn test_limit_restaurants_with_limit_smaller_than_len() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let result = limit_restaurants(&restaurants, Some(2));
+        assert_eq!(result.len(), 2);
+    }
+
+    #[test]
+    fn test_limit_restaurants_with_limit_equal_to_len() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let result = limit_restaurants(&restaurants, Some(3));
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn test_limit_restaurants_with_limit_greater_than_len() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let result = limit_restaurants(&restaurants, Some(100));
+        assert_eq!(result.len(), 3);
+    }
+
+    #[test]
+    fn test_limit_restaurants_with_zero() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let result = limit_restaurants(&restaurants, Some(0));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_limit_restaurants_empty_slice() {
+        let restaurants: Vec<Restaurant> = vec![];
+        let result = limit_restaurants(&restaurants, Some(5));
+        assert!(result.is_empty());
+    }
+
+    #[test]
+    fn test_limit_restaurants_preserves_order() {
+        let restaurants = test_fixtures::sample_restaurants();
+        let result = limit_restaurants(&restaurants, Some(2));
+        assert_eq!(result[0].name(), restaurants[0].name());
+        assert_eq!(result[1].name(), restaurants[1].name());
     }
 }
