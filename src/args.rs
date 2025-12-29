@@ -1,4 +1,6 @@
 use clap::Parser;
+use clap::builder::PossibleValuesParser;
+use crate::lang::AVAILABLE_LANGS;
 
 #[derive(Parser, Debug)]
 #[command(
@@ -33,7 +35,7 @@ pub struct Args {
     #[arg(short, long)]
     pub filter: Option<String>,
 
-    /// Show only first n restaurants
+/// Show first n restaurants
     #[arg(short, long)]
     pub number: Option<u16>,
 
@@ -53,9 +55,8 @@ pub struct Args {
     #[arg(short, long = "hide-closed")]
     pub hide_closed: bool,
 
-    /// Save the preferred language (fi or en)
-    // TODO: get language options from lang crate
-    #[arg(long = "set-lang")]
+    /// Save the preferred language
+    #[arg(long = "set-lang", value_parser = PossibleValuesParser::new(AVAILABLE_LANGS))]
     pub set_lang: Option<String>,
 
     /// Display help
