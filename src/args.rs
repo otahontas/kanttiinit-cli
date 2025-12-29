@@ -31,7 +31,7 @@ pub struct Args {
     #[arg(short, long, default_value_t = 0, allow_hyphen_values = true)]
     pub day: i32,
 
-    /// Filter courses by keyword
+    /// Filter courses by keyword TODO: make case insensitive
     #[arg(short, long)]
     pub filter: Option<String>,
 
@@ -52,15 +52,17 @@ pub struct Args {
     pub url: bool,
 
     /// Hide closed restaurants when searching for todays menus
-    #[arg(short, long = "hide-closed")]
+    #[arg(short, long = "hide-closed")] // todo: remove short
     pub hide_closed: bool,
+
+    // TODO: add hide no menu
 
     /// Save the preferred language
     #[arg(long = "set-lang", value_parser = PossibleValuesParser::new(AVAILABLE_LANGS))]
     pub set_lang: Option<String>,
 
     /// Display help
-    #[arg(long, action = clap::ArgAction::HelpLong)]
+    #[arg(long, action = clap::ArgAction::HelpLong)] // TODO: make short work
     help: Option<bool>, // handled automatically, no need for pub
 }
 
