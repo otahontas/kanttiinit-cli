@@ -42,7 +42,7 @@ pub fn handle_arg(args: Args) {
     }
 
     if args.day != 0 && args.hide_closed {
-        eprintln!("Cannot use both -d and -h options at the same time. Hiding closed restaurants works only when searching for todays menus. Display help with --help.");
+        eprintln!("Cannot use both -d and --hide-closed options at the same time. Hiding closed restaurants works only when searching for todays menus. Display help with --help.");
         return;
     }
 
