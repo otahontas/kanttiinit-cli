@@ -14,11 +14,7 @@ pub fn print_menus(
         (Local::now() + chrono::Duration::days(i64::from(day_offset))).format("%A %-d. of %B %Y");
     cprintln!("{}", date_offset);
     cprintln!("");
-    // check if all the restaurants menus are None
-    if restaurants_with_menus
-        .iter()
-        .all(|r| r.formatted_menu_items.is_none())
-    {
+    if restaurants_with_menus.is_empty() {
         cprintln!("<red>No restaurants matched your query.</>");
         return;
     }

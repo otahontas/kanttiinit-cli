@@ -1,19 +1,13 @@
 use clap::Parser;
 
-/// Kanttiinit.fi command-line interface
 #[derive(Parser, Debug)]
 #[command(
     about,
     version,
     long_about = None,
     arg_required_else_help = true,
-    // Automatic help flag is disabled, since short -h flag is reserved
-    // for hiding closed restaurants
-    disable_help_flag = true,
-    // Automatic version flag is disabled, since short -v flag needs
-    // to be generated in Args struct
-    disable_version_flag = true,
-    // TODO: read this from variable / other crate?
+    disable_help_flag = true, // -h is used to hide restaurants
+    disable_version_flag = true, // replace with custom setup that allows both -v and -V
     after_help = "Get all restaurants in a specific area:
 kanttiinit -q otaniemi
 
@@ -39,14 +33,13 @@ pub struct Args {
     #[arg(short, long)]
     pub filter: Option<String>,
 
-    /// Show only n restaurants
+    /// Show only first n restaurants
     #[arg(short, long)]
     pub number: Option<u16>,
 
     /// Print version
-    // Allows both -v and -V short flags to be used instead of just the clap default -V.
     #[arg(short = 'v', short_alias = 'V', long, action = clap::builder::ArgAction::Version)]
-    version: (), // handled automatically, no need for pub
+    version: (), // handled automatically, no need for pub here
 
     /// Show restaurant address
     #[arg(short, long)]
