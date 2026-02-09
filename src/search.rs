@@ -292,25 +292,16 @@ mod tests {
         let menus = test_fixtures::sample_menus();
 
         // Test with lowercase filter
-        let result_lower = format_restaurants_with_menus(
-            &restaurants,
-            &menus,
-            &Some("salad".to_string()),
-        );
+        let result_lower =
+            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()));
 
         // Test with uppercase filter
-        let result_upper = format_restaurants_with_menus(
-            &restaurants,
-            &menus,
-            &Some("SALAD".to_string()),
-        );
+        let result_upper =
+            format_restaurants_with_menus(&restaurants, &menus, &Some("SALAD".to_string()));
 
         // Test with mixed case filter
-        let result_mixed = format_restaurants_with_menus(
-            &restaurants,
-            &menus,
-            &Some("SaLaD".to_string()),
-        );
+        let result_mixed =
+            format_restaurants_with_menus(&restaurants, &menus, &Some("SaLaD".to_string()));
 
         // All three should match the same item "Chicken salad"
         assert_eq!(result_lower, result_upper);
@@ -393,13 +384,25 @@ mod tests {
             .expect("Failed to deserialize otaniemi restaurants from real API response");
 
         // Should have multiple restaurants
-        assert!(!restaurants.is_empty(), "Should have at least one restaurant");
+        assert!(
+            !restaurants.is_empty(),
+            "Should have at least one restaurant"
+        );
 
         // Verify all restaurants have required fields matching our Restaurant struct
         for restaurant in &restaurants {
-            assert!(!restaurant.name.is_empty(), "Restaurant name should not be empty");
-            assert!(!restaurant.url.is_empty(), "Restaurant URL should not be empty");
-            assert!(!restaurant.address.is_empty(), "Restaurant address should not be empty");
+            assert!(
+                !restaurant.name.is_empty(),
+                "Restaurant name should not be empty"
+            );
+            assert!(
+                !restaurant.url.is_empty(),
+                "Restaurant URL should not be empty"
+            );
+            assert!(
+                !restaurant.address.is_empty(),
+                "Restaurant address should not be empty"
+            );
             assert_eq!(
                 restaurant.opening_hours.len(),
                 7,
@@ -419,7 +422,10 @@ mod tests {
 
         // Check that we can access nested data
         for (restaurant_id, daily_menus) in &menus {
-            assert!(!restaurant_id.is_empty(), "Restaurant ID should not be empty");
+            assert!(
+                !restaurant_id.is_empty(),
+                "Restaurant ID should not be empty"
+            );
 
             for (date, items) in daily_menus {
                 // Date should be in YYYY-MM-DD format
@@ -427,7 +433,10 @@ mod tests {
 
                 // Verify menu items match our MenuItem struct
                 for item in items {
-                    assert!(!item.title.is_empty(), "Menu item title should not be empty");
+                    assert!(
+                        !item.title.is_empty(),
+                        "Menu item title should not be empty"
+                    );
                     // Properties can be empty (it's a Vec, not Option)
                 }
             }
@@ -441,13 +450,25 @@ mod tests {
             .expect("Failed to deserialize keskusta restaurants from real API response");
 
         // Should have multiple restaurants
-        assert!(!restaurants.is_empty(), "Should have at least one restaurant");
+        assert!(
+            !restaurants.is_empty(),
+            "Should have at least one restaurant"
+        );
 
         // Verify all restaurants have required fields
         for restaurant in &restaurants {
-            assert!(!restaurant.name.is_empty(), "Restaurant name should not be empty");
-            assert!(!restaurant.url.is_empty(), "Restaurant URL should not be empty");
-            assert!(!restaurant.address.is_empty(), "Restaurant address should not be empty");
+            assert!(
+                !restaurant.name.is_empty(),
+                "Restaurant name should not be empty"
+            );
+            assert!(
+                !restaurant.url.is_empty(),
+                "Restaurant URL should not be empty"
+            );
+            assert!(
+                !restaurant.address.is_empty(),
+                "Restaurant address should not be empty"
+            );
             assert_eq!(
                 restaurant.opening_hours.len(),
                 7,
@@ -467,13 +488,19 @@ mod tests {
 
         // Check nested structure
         for (restaurant_id, daily_menus) in &menus {
-            assert!(!restaurant_id.is_empty(), "Restaurant ID should not be empty");
+            assert!(
+                !restaurant_id.is_empty(),
+                "Restaurant ID should not be empty"
+            );
 
             for (date, items) in daily_menus {
                 assert!(date.contains('-'), "Date should be in YYYY-MM-DD format");
 
                 for item in items {
-                    assert!(!item.title.is_empty(), "Menu item title should not be empty");
+                    assert!(
+                        !item.title.is_empty(),
+                        "Menu item title should not be empty"
+                    );
                 }
             }
         }
@@ -482,8 +509,8 @@ mod tests {
     #[test]
     fn test_api_responses_handle_empty_menus() {
         let json = include_str!("test_fixtures/otaniemi_menus.json");
-        let menus: MenusFromApi = serde_json::from_str(json)
-            .expect("Failed to deserialize otaniemi menus");
+        let menus: MenusFromApi =
+            serde_json::from_str(json).expect("Failed to deserialize otaniemi menus");
 
         // Some restaurants should have empty menus (closed during holidays)
         let has_empty = menus
@@ -499,8 +526,8 @@ mod tests {
     #[test]
     fn test_api_responses_handle_closure_messages() {
         let json = include_str!("test_fixtures/otaniemi_menus.json");
-        let menus: MenusFromApi = serde_json::from_str(json)
-            .expect("Failed to deserialize otaniemi menus");
+        let menus: MenusFromApi =
+            serde_json::from_str(json).expect("Failed to deserialize otaniemi menus");
 
         // Some restaurants have closure messages as menu items
         let has_closure_message = menus.values().any(|daily_menus| {
