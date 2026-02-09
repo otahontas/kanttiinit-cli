@@ -1,1 +1,7 @@
 /target
+.devenv
+.direnv
+.envrc
+.devenv.flake.nix
+.pre-commit-config.yaml
+devenv.local.nix

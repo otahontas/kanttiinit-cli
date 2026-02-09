@@ -1,7 +1,7 @@
 use crate::args::Args;
 use crate::lang::{get_lang, set_lang};
 use crate::output::print_menus;
-use crate::search::{format_restaurants_with_menus, get_menus, get_restaurants, Restaurant};
+use crate::search::{Restaurant, format_restaurants_with_menus, get_menus, get_restaurants};
 
 fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restaurant] {
     limit.map_or(restaurants, |n| {
@@ -56,12 +56,16 @@ pub fn handle_arg(args: Args) {
     }
 
     if args.day != 0 && args.hide_closed {
-        eprintln!("Cannot use both -d and --hide-closed options at the same time. Hiding closed restaurants works only when searching for todays menus. Display help with --help.");
+        eprintln!(
+            "Cannot use both -d and --hide-closed options at the same time. Hiding closed restaurants works only when searching for todays menus. Display help with --help."
+        );
         return;
     }
 
     if args.day != 0 && args.hide_no_menu {
-        eprintln!("Cannot use both -d and --hide-no-menu options at the same time. Hiding restaurants without menu works only when searching for todays menus. Display help with --help.");
+        eprintln!(
+            "Cannot use both -d and --hide-no-menu options at the same time. Hiding restaurants without menu works only when searching for todays menus. Display help with --help."
+        );
         return;
     }
 

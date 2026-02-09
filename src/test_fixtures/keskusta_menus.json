@@ -7,15 +7,11 @@
       },
       {
         "title": "Chili-ginger marinated fava bean bowl",
-        "properties": [
-          "G"
-        ]
+        "properties": ["G"]
       },
       {
         "title": "Juicy vegan strips in \"butter\" sauce",
-        "properties": [
-          "G"
-        ]
+        "properties": ["G"]
       },
       {
         "title": "Baguette bar",
@@ -23,23 +19,15 @@
       },
       {
         "title": "Kycklingbollar, BBQ-sås",
-        "properties": [
-          "G",
-          "M"
-        ]
+        "properties": ["G", "M"]
       },
       {
         "title": "White rice",
-        "properties": [
-          "G"
-        ]
+        "properties": ["G"]
       },
       {
         "title": "Plum quark dessert",
-        "properties": [
-          "G",
-          "L"
-        ]
+        "properties": ["G", "L"]
       }
     ]
   },
@@ -59,9 +47,7 @@
     "2025-12-29": [
       {
         "title": "TexMex seed balls and Louisana sauce",
-        "properties": [
-          "G"
-        ]
+        "properties": ["G"]
       },
       {
         "title": "Greek-style cherry tomato oven bake",
@@ -69,21 +55,15 @@
       },
       {
         "title": "Chorizo meatballs with BBQ sauce",
-        "properties": [
-          "L"
-        ]
+        "properties": ["L"]
       },
       {
         "title": "Roasted tofu bowl",
-        "properties": [
-          "G"
-        ]
+        "properties": ["G"]
       },
       {
         "title": "Strawberry curd",
-        "properties": [
-          "G"
-        ]
+        "properties": ["G"]
       }
     ]
   },
@@ -100,9 +80,7 @@
       },
       {
         "title": "Crispy vegetable steaks & \"Butter\" sauce",
-        "properties": [
-          "G"
-        ]
+        "properties": ["G"]
       },
       {
         "title": "Sweet 'n' spicy vegan kebab bowl",
