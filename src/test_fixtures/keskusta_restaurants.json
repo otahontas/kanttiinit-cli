@@ -95,15 +95,7 @@
     "priceCategory": "student"
   },
   {
-    "openingHours": [
-      null,
-      null,
-      null,
-      null,
-      null,
-      null,
-      null
-    ],
+    "openingHours": [null, null, null, null, null, null, null],
     "id": 62,
     "type": null,
     "name": "Ravintola Oliver",

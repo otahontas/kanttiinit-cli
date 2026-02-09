@@ -8,11 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Removed
+
 - Geolocation-based search (`-g`, `--geo`) - area search via `-q` is sufficient
 
 ## [0.1.0] - 2025-11-13
 
 ### Added
+
 - Initial release of Kanttiinit CLI in Rust
 - Query-based restaurant search (`-q`, `--query`)
 - Geolocation-based restaurant search (`-g`, `--geo`) using OpenStreetMap's Nominatim API
@@ -29,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Linting and formatting configuration (rustfmt, clippy)
 
 ### Changed
+
 - Migrated from C++ to Rust for better memory safety and modern tooling
 - Replaced curl dependency with native Rust HTTP client (ureq)
 - Switched from Google Maps API to OpenStreetMap Nominatim API (no API key required)
