@@ -25,14 +25,20 @@ pub fn print_menus(
                     cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
                 } else {
                     let current_time = Local::now().time();
-                    let times = todays_opening_hours.split_once('-').and_then(|(start, end)| {
-                        let start_time = chrono::NaiveTime::parse_from_str(start.trim(), "%H:%M").ok()?;
-                        let end_time = chrono::NaiveTime::parse_from_str(end.trim(), "%H:%M").ok()?;
-                        Some((start_time, end_time))
-                    });
+                    let times = todays_opening_hours
+                        .split_once('-')
+                        .and_then(|(start, end)| {
+                            let start_time =
+                                chrono::NaiveTime::parse_from_str(start.trim(), "%H:%M").ok()?;
+                            let end_time =
+                                chrono::NaiveTime::parse_from_str(end.trim(), "%H:%M").ok()?;
+                            Some((start_time, end_time))
+                        });
 
                     match times {
-                        Some((start_time, end_time)) if current_time < start_time || current_time > end_time => {
+                        Some((start_time, end_time))
+                            if current_time < start_time || current_time > end_time =>
+                        {
                             // Outside opening hours (before opening or after closing)
                             cprintln!(
                                 "<strong>{}</> <dim>{}</>",

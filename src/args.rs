@@ -1,6 +1,6 @@
-use clap::Parser;
-use clap::builder::PossibleValuesParser;
 use crate::lang::AVAILABLE_LANGS;
+use clap::builder::PossibleValuesParser;
+use clap::Parser;
 
 const AFTER_HELP: &str = "Get all restaurants in a specific area:
 kanttiinit -q otaniemi
@@ -23,6 +23,7 @@ kanttiinit -q alvari -d 1";
     disable_version_flag = true, // replace with custom setup that allows both -v and -V
     after_help = AFTER_HELP
 )]
+#[allow(clippy::manual_non_exhaustive)] // version field is for clap version handling, not non-exhaustive pattern
 pub struct Args {
     /// Search restaurants by restaurant or area name (e.g. otaniemi, kumpula, kaivopiha)
     #[arg(short, long)]
