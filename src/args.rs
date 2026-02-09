@@ -1,6 +1,6 @@
 use crate::lang::AVAILABLE_LANGS;
-use clap::builder::PossibleValuesParser;
 use clap::Parser;
+use clap::builder::PossibleValuesParser;
 
 const AFTER_HELP: &str = "Get all restaurants in a specific area:
 kanttiinit -q otaniemi

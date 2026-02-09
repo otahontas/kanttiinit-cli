@@ -22,52 +22,27 @@
     "2025-12-29": [
       {
         "title": "Lunch : Carrot crêpes 3 pcs",
-        "properties": [
-          "A+",
-          "L"
-        ]
+        "properties": ["A+", "L"]
       },
       {
         "title": "Lunch : Lingonberry jam",
-        "properties": [
-          "A+",
-          "G",
-          "L",
-          "M",
-          "VV"
-        ]
+        "properties": ["A+", "G", "L", "M", "VV"]
       },
       {
         "title": "Lunch : Mashed potatoes",
-        "properties": [
-          "A+",
-          "G",
-          "L"
-        ]
+        "properties": ["A+", "G", "L"]
       },
       {
         "title": "Lunch : Crispy fish fingers 6 pcs",
-        "properties": [
-          "A+",
-          "L",
-          "M"
-        ]
+        "properties": ["A+", "L", "M"]
       },
       {
         "title": "Lunch : Chive and dill yoghurt",
-        "properties": [
-          "A+",
-          "G",
-          "L"
-        ]
+        "properties": ["A+", "G", "L"]
       },
       {
         "title": "Lunch : Mashed potatoes",
-        "properties": [
-          "A+",
-          "G",
-          "L"
-        ]
+        "properties": ["A+", "G", "L"]
       }
     ]
   },

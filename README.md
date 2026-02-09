@@ -29,21 +29,25 @@ cargo install --path .
 ### Basic Examples
 
 Search for restaurants in a specific area:
+
 ```bash
 kanttiinit -q otaniemi
 ```
 
 Search for restaurants by name:
+
 ```bash
 kanttiinit -q unicafe
 ```
 
 Filter menu items by keyword:
+
 ```bash
 kanttiinit -q töölö -f salad
 ```
 
 View menus for tomorrow:
+
 ```bash
 kanttiinit -q alvari -d 1
 ```
@@ -67,6 +71,7 @@ Options:
 ### Setting Language
 
 Set your preferred language (Finnish or English):
+
 ```bash
 kanttiinit --set-lang fi
 kanttiinit --set-lang en
