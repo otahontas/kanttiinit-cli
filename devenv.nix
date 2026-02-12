@@ -7,7 +7,7 @@ let
     settings.global.excludes = [
       "*.lock"
       "target/"
-      ".devenv/"
+      ".devenv*"
       ".direnv/"
     ];
     programs = {
@@ -32,23 +32,40 @@ in
     pkgs.gitleaks
   ];
 
+  enterShell = ''
+    echo "kanttiinit-cli dev shell. Run 'devenv tasks list' to see available tasks."
+  '';
+
+  enterTest = ''
+    cargo test
+    cargo clippy --all-targets --all-features -- -D warnings
+    treefmt --fail-on-change
+    cargo build
+  '';
+
   tasks = {
     "kanttiinit:build" = {
+      description = "Build the project";
       exec = "cargo build";
     };
     "kanttiinit:lint" = {
+      description = "Run clippy with strict warnings";
       exec = "cargo clippy --all-targets --all-features -- -D warnings";
     };
     "kanttiinit:test" = {
+      description = "Run tests";
       exec = "cargo test";
     };
     "kanttiinit:watch" = {
+      description = "Watch for changes and run";
       exec = "cargo watch -x run";
     };
     "kanttiinit:fmt" = {
+      description = "Format all files";
       exec = "treefmt";
     };
     "kanttiinit:fmt:check" = {
+      description = "Check formatting without modifying files";
       exec = "treefmt --fail-on-change";
     };
   };

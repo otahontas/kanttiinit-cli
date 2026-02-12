@@ -83,29 +83,41 @@ The language preference is saved in `~/.config/kanttiinit/config.toml`.
 
 ### Prerequisites
 
-- Rust 1.70 or later
-- Cargo
+This project uses [devenv](https://devenv.sh) to manage the development environment. Install devenv and optionally [direnv](https://direnv.net) for automatic shell activation.
 
-### Building
+### Setup
+
+```bash
+# With direnv (recommended)
+direnv allow
+
+# Without direnv
+devenv shell
+```
+
+### Available tasks
+
+List all tasks with `devenv tasks list`. Common ones:
+
+```bash
+devenv tasks run kanttiinit:build       # Build the project
+devenv tasks run kanttiinit:test        # Run tests
+devenv tasks run kanttiinit:lint        # Run clippy with strict warnings
+devenv tasks run kanttiinit:fmt         # Format all files
+devenv tasks run kanttiinit:fmt:check   # Check formatting
+devenv tasks run kanttiinit:watch       # Watch for changes and run
+```
+
+Run all checks at once:
+
+```bash
+devenv test
+```
+
+### Building a release binary
 
 ```bash
 cargo build --release
-```
-
-### Running Tests
-
-```bash
-cargo test
-```
-
-### Linting and Formatting
-
-```bash
-# Format code
-cargo fmt
-
-# Run clippy
-cargo clippy --all-targets --all-features -- -D warnings
 ```
 
 ## Contributing
