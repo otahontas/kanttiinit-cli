@@ -19,7 +19,7 @@ Download pre-built binaries for your platform from the [releases page](https://g
 ### From source
 
 ```bash
-git clone https://github.com/otahontas/kanttiinit-cli && \
+git clone https://github.com/Kanttiinit/cli && \
 cd cli && \
 cargo install --path .
 ```
@@ -56,16 +56,17 @@ kanttiinit -q alvari -d 1
 
 ```
 Options:
-  -q, --query <QUERY>          Search restaurants by restaurant or area name
-  -d, --day <DAY>              Specify day offset (0=today, 1=tomorrow, etc.) [default: 0]
-  -f, --filter <FILTER>        Filter courses by keyword
-  -n, --number <NUMBER>        Show only n restaurants
-  -v, --version                Print version
-  -a, --address                Show restaurant address
-  -u, --url                    Show restaurant URL
-  -h, --hide-closed            Hide closed restaurants when searching for today's menus
-      --set-lang <SET_LANG>    Save the preferred language (fi or en)
-      --help                   Display help
+  -q, --query <QUERY>        Search restaurants by restaurant or area name
+  -d, --day <DAY>            Specify day (0=today, 1=tomorrow, -1=yesterday, etc.) [default: 0]
+  -f, --filter <FILTER>      Filter courses by keyword (case insensitive)
+  -n, --head <HEAD>          Show first n restaurants
+  -v, --version              Print version
+  -a, --address              Show restaurant address in the output
+  -u, --url                  Show restaurant URL in the output
+      --hide-closed          Hide closed restaurants when searching for todays menus
+      --hide-no-menu         Hide restaurants without menu when searching for todays menus
+      --set-lang <SET_LANG>  Save the preferred language [possible values: fi, en]
+  -h, --help                 Print help
 ```
 
 ### Setting Language
