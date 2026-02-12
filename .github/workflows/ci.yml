@@ -6,9 +6,12 @@ on:
   pull_request:
     branches: [main]
 
+permissions:
+  contents: write
+
 jobs:
-  devenv:
-    name: Devenv
+  check:
+    name: Check (${{ matrix.os }})
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -38,3 +41,105 @@ jobs:
 
       - name: Run build
         run: devenv tasks run kanttiinit:build
+
+  should-release:
+    name: Check if release needed
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: check
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      release: ${{ steps.check-tag.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get version
+        id: version
+        run: echo "version=$(grep '^version = ' Cargo.toml | head -1 | cut -d '"' -f 2)" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check-tag
+        run: |
+          if gh release view "v${{ steps.version.outputs.version }}" > /dev/null 2>&1; then
+            echo "release=false" >> $GITHUB_OUTPUT
+          else
+            echo "release=true" >> $GITHUB_OUTPUT
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    name: Build ${{ matrix.target }}
+    if: needs.should-release.outputs.release == 'true'
+    needs: should-release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact: kanttiinit
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-musl
+            artifact: kanttiinit
+          - os: macos-latest
+            target: x86_64-apple-darwin
+            artifact: kanttiinit
+          - os: macos-latest
+            target: aarch64-apple-darwin
+            artifact: kanttiinit
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: kanttiinit.exe
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Install musl tools
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: sudo apt-get update && sudo apt-get install -y musl-tools
+
+      - name: Build
+        run: cargo build --release --target ${{ matrix.target }}
+
+      - name: Package (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cd target/${{ matrix.target }}/release
+          tar czf ../../../kanttiinit-${{ matrix.target }}.tar.gz ${{ matrix.artifact }}
+
+      - name: Package (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: |
+          cd target/${{ matrix.target }}/release
+          7z a ../../../kanttiinit-${{ matrix.target }}.zip ${{ matrix.artifact }}
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanttiinit-${{ matrix.target }}
+          path: kanttiinit-${{ matrix.target }}.*
+
+  release:
+    name: Create release
+    needs: [should-release, build]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.should-release.outputs.version }}
+          files: kanttiinit-*
+          generate_release_notes: true
