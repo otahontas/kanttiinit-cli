@@ -108,12 +108,6 @@ devenv tasks run kanttiinit:fmt:check   # Check formatting
 devenv tasks run kanttiinit:watch       # Watch for changes and run
 ```
 
-Run all checks at once:
-
-```bash
-devenv test
-```
-
 ### Building a release binary
 
 ```bash

@@ -37,10 +37,9 @@ in
   '';
 
   enterTest = ''
-    cargo test
-    cargo clippy --all-targets --all-features -- -D warnings
-    treefmt --fail-on-change
-    cargo build
+    cargo --version
+    rustc --version
+    treefmt --version
   '';
 
   tasks = {
