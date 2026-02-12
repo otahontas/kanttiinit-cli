@@ -4,6 +4,9 @@ on:
   release:
     types: [published]
 
+permissions:
+  contents: write
+
 jobs:
   build-binaries:
     name: Build ${{ matrix.target }}
@@ -57,6 +60,4 @@ jobs:
       - name: Upload to release
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            kanttiinit-${{ matrix.target }}.tar.gz
-            kanttiinit-${{ matrix.target }}.zip
+          files: kanttiinit-${{ matrix.target }}.*
