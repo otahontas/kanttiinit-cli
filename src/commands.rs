@@ -21,12 +21,12 @@ fn handle_query(query: &str, lang: &str, args: &Args) -> Result<(), anyhow::Erro
             .filter(|r| menus.contains_key(&r.id.to_string()))
             .collect();
         let limited = limit_restaurants(&filtered, args.head);
-        let formatted = format_restaurants_with_menus(limited, &menus, &args.filter);
+        let formatted = format_restaurants_with_menus(limited, &menus, &args.filter, args.day);
         print_menus(formatted, args.day, args.address, args.url);
     } else {
         let limited = limit_restaurants(&restaurants, args.head);
         let menus = get_menus(limited, lang, args.day)?;
-        let formatted = format_restaurants_with_menus(limited, &menus, &args.filter);
+        let formatted = format_restaurants_with_menus(limited, &menus, &args.filter, args.day);
         print_menus(formatted, args.day, args.address, args.url);
     }
 

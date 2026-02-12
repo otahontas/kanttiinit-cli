@@ -157,13 +157,15 @@ pub struct RestaurantWithMenu {
     pub formatted_menu_items: Option<Vec<FormattedMenuItem>>,
 }
 
-// TODO: format opening_hours properly
 pub fn format_restaurants_with_menus(
     restaurants: &[Restaurant],
     menus: &Menus,
     maybe_filter: &Option<String>,
+    day_offset: i32,
 ) -> Vec<RestaurantWithMenu> {
     let filter = maybe_filter.as_deref().unwrap_or_default().to_lowercase();
+    let target_date = Local::now() + chrono::Duration::days(i64::from(day_offset));
+    let weekday_index = target_date.weekday().days_since(chrono::Weekday::Mon) as usize;
     restaurants
         .iter()
         .map(|restaurant| {
@@ -180,7 +182,11 @@ pub fn format_restaurants_with_menus(
             });
             RestaurantWithMenu {
                 name: restaurant.name.clone(),
-                opening_hours: restaurant.opening_hours.first().cloned().flatten(),
+                opening_hours: restaurant
+                    .opening_hours
+                    .get(weekday_index)
+                    .cloned()
+                    .flatten(),
                 address: restaurant.address.clone(),
                 url: restaurant.url.clone(),
                 formatted_menu_items,
@@ -193,6 +199,7 @@ pub fn format_restaurants_with_menus(
 mod tests {
     use super::*;
     use crate::test_fixtures;
+    use chrono::Datelike;
 
     // Tests for is_restaurant_open_now
 
@@ -239,13 +246,23 @@ mod tests {
         let restaurants = test_fixtures::sample_restaurants();
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
 
         assert_eq!(result.len(), 3);
         assert_eq!(result[0].name, "Aalto Yliopiston ravintola");
         assert_eq!(result[0].address, "Otakaari 1, Espoo");
         assert_eq!(result[0].url, "https://example.com/aalto");
-        assert_eq!(result[0].opening_hours, Some("10:30-13:30".to_string()));
+
+        // Opening hours depend on current weekday (sample has Mon-Fri hours, Sat-Sun None)
+        let today = chrono::Local::now()
+            .weekday()
+            .days_since(chrono::Weekday::Mon);
+        let expected_hours = restaurants[0]
+            .opening_hours()
+            .get(today as usize)
+            .cloned()
+            .flatten();
+        assert_eq!(result[0].opening_hours, expected_hours);
 
         let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
         assert_eq!(menu_items.len(), 3);
@@ -259,7 +276,7 @@ mod tests {
         let menus = test_fixtures::sample_menus();
 
         let result =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()));
+            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()), 0);
 
         // First restaurant should only have "Chicken salad"
         let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
@@ -276,6 +293,7 @@ mod tests {
             &restaurants,
             &menus,
             &Some("nonexistent_food".to_string()),
+            0,
         );
 
         // All restaurants should have empty menu items after filtering
@@ -293,15 +311,15 @@ mod tests {
 
         // Test with lowercase filter
         let result_lower =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()));
+            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()), 0);
 
         // Test with uppercase filter
         let result_upper =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("SALAD".to_string()));
+            format_restaurants_with_menus(&restaurants, &menus, &Some("SALAD".to_string()), 0);
 
         // Test with mixed case filter
         let result_mixed =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("SaLaD".to_string()));
+            format_restaurants_with_menus(&restaurants, &menus, &Some("SaLaD".to_string()), 0);
 
         // All three should match the same item "Chicken salad"
         assert_eq!(result_lower, result_upper);
@@ -317,7 +335,7 @@ mod tests {
         let restaurants = vec![test_fixtures::restaurant_without_hours()];
         let menus = test_fixtures::empty_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
 
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].name, "Mystery Restaurant");
@@ -329,7 +347,7 @@ mod tests {
         let restaurants = vec![test_fixtures::restaurant_without_hours()];
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
 
         assert_eq!(result.len(), 1);
         assert!(result[0].opening_hours.is_none());
@@ -340,7 +358,7 @@ mod tests {
         let restaurants = test_fixtures::sample_restaurants();
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
 
         // Check that properties are properly joined with ", "
         let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
@@ -352,7 +370,7 @@ mod tests {
         let restaurants: Vec<Restaurant> = vec![];
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
 
         assert!(result.is_empty());
     }
