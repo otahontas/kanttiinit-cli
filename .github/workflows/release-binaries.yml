@@ -1,14 +1,15 @@
-name: Release binaries
+name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*"
 
 permissions:
   contents: write
 
 jobs:
-  build-binaries:
+  build:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
     strategy:
@@ -57,7 +58,24 @@ jobs:
           cd target/${{ matrix.target }}/release
           7z a ../../../kanttiinit-${{ matrix.target }}.zip ${{ matrix.artifact }}
 
-      - name: Upload to release
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kanttiinit-${{ matrix.target }}
+          path: kanttiinit-${{ matrix.target }}.*
+
+  release:
+    name: Create release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          merge-multiple: true
+
+      - name: Create release
         uses: softprops/action-gh-release@v2
         with:
-          files: kanttiinit-${{ matrix.target }}.*
+          files: kanttiinit-*
+          generate_release_notes: true
