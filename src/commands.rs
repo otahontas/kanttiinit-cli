@@ -33,47 +33,38 @@ fn handle_query(query: &str, lang: &str, args: &Args) -> Result<(), anyhow::Erro
     Ok(())
 }
 
-pub fn handle_arg(args: Args) {
+pub fn handle_arg(args: Args) -> Result<(), String> {
     if let Some(lang_from_user) = args.set_lang {
-        match set_lang(&lang_from_user) {
-            Ok(_) => println!("Language set to: {}", lang_from_user),
-            Err(e) => eprintln!("Error setting language: {}", e),
-        }
-        return;
+        set_lang(&lang_from_user).map_err(|e| format!("Error setting language: {}", e))?;
+        println!("Language set to: {}", lang_from_user);
+        return Ok(());
     }
 
-    let lang = match get_lang() {
-        Ok(l) => l,
-        Err(e) => {
-            eprintln!("Error getting language: {}", e);
-            return;
-        }
-    };
+    let lang = get_lang().map_err(|e| format!("Error getting language: {}", e))?;
 
     if args.query.is_none() {
-        eprintln!("Use the -q option to query restaurants. Display help with --help.");
-        return;
+        return Err(
+            "Use the -q option to query restaurants. Display help with --help.".to_string(),
+        );
     }
 
     if args.day != 0 && args.hide_closed {
-        eprintln!(
-            "Cannot use both -d and --hide-closed options at the same time. Hiding closed restaurants works only when searching for todays menus. Display help with --help."
+        return Err(
+            "Cannot use both -d and --hide-closed options at the same time. Hiding closed restaurants works only when searching for todays menus. Display help with --help.".to_string()
         );
-        return;
     }
 
     if args.day != 0 && args.hide_no_menu {
-        eprintln!(
-            "Cannot use both -d and --hide-no-menu options at the same time. Hiding restaurants without menu works only when searching for todays menus. Display help with --help."
+        return Err(
+            "Cannot use both -d and --hide-no-menu options at the same time. Hiding restaurants without menu works only when searching for todays menus. Display help with --help.".to_string()
         );
-        return;
     }
 
     if let Some(query) = &args.query {
-        if let Err(e) = handle_query(query, &lang, &args) {
-            eprintln!("Error: {}", e);
-        }
+        handle_query(query, &lang, &args).map_err(|e| format!("Error: {}", e))?;
     }
+
+    Ok(())
 }
 
 #[cfg(test)]
