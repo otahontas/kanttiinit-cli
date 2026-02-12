@@ -3,7 +3,8 @@ use color_print::cprintln;
 
 use crate::search::RestaurantWithMenu;
 
-// TODO: i18n based on lang selection
+// Date formatting is English-only. The lang setting only affects API content (menu items,
+// restaurant names), not the CLI's own output. Localizing date display is out of scope.
 pub fn print_menus(
     restaurants_with_menus: Vec<RestaurantWithMenu>,
     day_offset: i32,
