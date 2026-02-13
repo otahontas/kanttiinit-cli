@@ -2,6 +2,7 @@ use crate::args::Args;
 use crate::lang::{get_lang, set_lang};
 use crate::output::print_menus;
 use crate::search::{Restaurant, format_restaurants_with_menus, get_menus, get_restaurants};
+use chrono::Local;
 
 fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restaurant] {
     limit.map_or(restaurants, |n| {
@@ -11,10 +12,16 @@ fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restau
 }
 
 fn handle_query(query: &str, lang: &str, args: &Args) -> Result<(), anyhow::Error> {
-    let restaurants = get_restaurants(query, lang, args.hide_closed)?;
+    let now_dt = Local::now();
+    let today = now_dt.date_naive();
+    let now = now_dt.time();
+    let target_date = today + chrono::Duration::days(i64::from(args.day));
+    let is_today = args.day == 0;
+
+    let restaurants = get_restaurants(query, lang, args.hide_closed, today, now)?;
 
     let (limited, menus) = if args.hide_no_menu {
-        let menus = get_menus(&restaurants, lang, args.day)?;
+        let menus = get_menus(&restaurants, lang, target_date)?;
         let filtered: Vec<_> = restaurants
             .into_iter()
             .filter(|r| menus.contains_key(&r.id.to_string()))
@@ -23,12 +30,19 @@ fn handle_query(query: &str, lang: &str, args: &Args) -> Result<(), anyhow::Erro
         (limited, menus)
     } else {
         let limited = limit_restaurants(&restaurants, args.head).to_vec();
-        let menus = get_menus(&limited, lang, args.day)?;
+        let menus = get_menus(&limited, lang, target_date)?;
         (limited, menus)
     };
 
-    let formatted = format_restaurants_with_menus(&limited, &menus, &args.filter, args.day);
-    print_menus(formatted, args.day, args.address, args.url);
+    let formatted = format_restaurants_with_menus(&limited, &menus, &args.filter, target_date);
+    print_menus(
+        formatted,
+        target_date,
+        now,
+        is_today,
+        args.address,
+        args.url,
+    );
 
     Ok(())
 }

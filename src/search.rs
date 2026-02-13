@@ -1,4 +1,4 @@
-use chrono::{Datelike, Local};
+use chrono::{Datelike, NaiveDate, NaiveTime};
 use serde::Deserialize;
 use std::collections::HashMap;
 
@@ -60,7 +60,11 @@ type DailyMenu = HashMap<String, MenuItems>;
 type MenusFromApi = HashMap<String, DailyMenu>;
 type Menus = HashMap<String, MenuItems>;
 
-fn is_restaurant_open_now(opening_hours: &[Option<String>], weekday_index: u32) -> bool {
+fn is_restaurant_open_now(
+    opening_hours: &[Option<String>],
+    weekday_index: u32,
+    now: NaiveTime,
+) -> bool {
     let hours = match opening_hours.get(weekday_index as usize) {
         Some(Some(h)) => h,
         _ => return false,
@@ -77,7 +81,6 @@ fn is_restaurant_open_now(opening_hours: &[Option<String>], weekday_index: u32) 
         Ok(t) => t,
         Err(_) => return false,
     };
-    let now = chrono::Local::now().time();
     start_time <= now && now <= end_time
 }
 
@@ -85,11 +88,10 @@ pub fn get_restaurants(
     query: &str,
     lang: &str,
     hide_closed: bool,
+    today: NaiveDate,
+    now: NaiveTime,
 ) -> Result<Restaurants, anyhow::Error> {
-    let current_date_index_in_week = chrono::offset::Local::now()
-        .date_naive()
-        .weekday()
-        .days_since(chrono::Weekday::Mon);
+    let current_date_index_in_week = today.weekday().days_since(chrono::Weekday::Mon);
     let mut restaurants = ureq::get("https://kitchen.kanttiinit.fi/restaurants")
         .query("query", query)
         .query("lang", lang)
@@ -100,7 +102,7 @@ pub fn get_restaurants(
             if !hide_closed {
                 return true;
             }
-            is_restaurant_open_now(&restaurant.opening_hours, current_date_index_in_week)
+            is_restaurant_open_now(&restaurant.opening_hours, current_date_index_in_week, now)
         })
         .collect::<Restaurants>();
     restaurants.sort_by(|a, b| a.name.cmp(&b.name));
@@ -110,12 +112,10 @@ pub fn get_restaurants(
 pub fn get_menus(
     restaurants: &[Restaurant],
     lang: &str,
-    day_offset: i32,
+    target_date: NaiveDate,
 ) -> Result<Menus, anyhow::Error> {
-    let day_to_fetch_query =
-        (Local::now() + chrono::Duration::days(i64::from(day_offset))).format("%Y-%m-%d");
+    let day_key = target_date.format("%Y-%m-%d").to_string();
 
-    let day_key = day_to_fetch_query.to_string();
     Ok(ureq::get("https://kitchen.kanttiinit.fi/menus")
         .query(
             "restaurants",
@@ -157,10 +157,9 @@ pub fn format_restaurants_with_menus(
     restaurants: &[Restaurant],
     menus: &Menus,
     maybe_filter: &Option<String>,
-    day_offset: i32,
+    target_date: NaiveDate,
 ) -> Vec<RestaurantWithMenu> {
     let filter = maybe_filter.as_deref().unwrap_or_default().to_lowercase();
-    let target_date = Local::now() + chrono::Duration::days(i64::from(day_offset));
     let weekday_index = target_date.weekday().days_since(chrono::Weekday::Mon) as usize;
     restaurants
         .iter()
@@ -197,42 +196,51 @@ mod tests {
     use crate::test_fixtures;
     use chrono::Datelike;
 
+    // A fixed time for tests that only care about error-path behavior
+    fn noon() -> NaiveTime {
+        NaiveTime::from_hms_opt(12, 0, 0).unwrap()
+    }
+
+    fn today() -> NaiveDate {
+        chrono::Local::now().date_naive()
+    }
+
     // Tests for is_restaurant_open_now
 
     #[test]
     fn test_is_restaurant_open_now_returns_false_for_empty_hours() {
         let hours: Vec<Option<String>> = vec![];
-        assert!(!is_restaurant_open_now(&hours, 0));
+        assert!(!is_restaurant_open_now(&hours, 0, noon()));
     }
 
     #[test]
     fn test_is_restaurant_open_now_returns_false_for_none_on_weekday() {
         let hours = vec![None, Some("10:00-14:00".to_string())];
-        assert!(!is_restaurant_open_now(&hours, 0)); // Monday is None
+        assert!(!is_restaurant_open_now(&hours, 0, noon())); // Monday is None
     }
 
     #[test]
     fn test_is_restaurant_open_now_returns_false_for_weekday_out_of_bounds() {
         let hours = vec![Some("10:00-14:00".to_string())];
-        assert!(!is_restaurant_open_now(&hours, 7)); // Only Monday exists
+        assert!(!is_restaurant_open_now(&hours, 7, noon())); // Only Monday exists
     }
 
     #[test]
     fn test_is_restaurant_open_now_returns_false_for_malformed_hours_no_dash() {
         let hours = vec![Some("1000".to_string())];
-        assert!(!is_restaurant_open_now(&hours, 0));
+        assert!(!is_restaurant_open_now(&hours, 0, noon()));
     }
 
     #[test]
     fn test_is_restaurant_open_now_returns_false_for_invalid_start_time() {
         let hours = vec![Some("invalid-14:00".to_string())];
-        assert!(!is_restaurant_open_now(&hours, 0));
+        assert!(!is_restaurant_open_now(&hours, 0, noon()));
     }
 
     #[test]
     fn test_is_restaurant_open_now_returns_false_for_invalid_end_time() {
         let hours = vec![Some("10:00-invalid".to_string())];
-        assert!(!is_restaurant_open_now(&hours, 0));
+        assert!(!is_restaurant_open_now(&hours, 0, noon()));
     }
 
     // Tests for format_restaurants_with_menus
@@ -242,7 +250,7 @@ mod tests {
         let restaurants = test_fixtures::sample_restaurants();
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, today());
 
         assert_eq!(result.len(), 3);
         assert_eq!(result[0].name, "Aalto Yliopiston ravintola");
@@ -250,12 +258,10 @@ mod tests {
         assert_eq!(result[0].url, "https://example.com/aalto");
 
         // Opening hours depend on current weekday (sample has Mon-Fri hours, Sat-Sun None)
-        let today = chrono::Local::now()
-            .weekday()
-            .days_since(chrono::Weekday::Mon);
+        let today_weekday = today().weekday().days_since(chrono::Weekday::Mon);
         let expected_hours = restaurants[0]
             .opening_hours()
-            .get(today as usize)
+            .get(today_weekday as usize)
             .cloned()
             .flatten();
         assert_eq!(result[0].opening_hours, expected_hours);
@@ -271,8 +277,12 @@ mod tests {
         let restaurants = test_fixtures::sample_restaurants();
         let menus = test_fixtures::sample_menus();
 
-        let result =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()), 0);
+        let result = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("salad".to_string()),
+            today(),
+        );
 
         // First restaurant should only have "Chicken salad"
         let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
@@ -289,7 +299,7 @@ mod tests {
             &restaurants,
             &menus,
             &Some("nonexistent_food".to_string()),
-            0,
+            today(),
         );
 
         // All restaurants should have empty menu items after filtering
@@ -306,16 +316,28 @@ mod tests {
         let menus = test_fixtures::sample_menus();
 
         // Test with lowercase filter
-        let result_lower =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("salad".to_string()), 0);
+        let result_lower = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("salad".to_string()),
+            today(),
+        );
 
         // Test with uppercase filter
-        let result_upper =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("SALAD".to_string()), 0);
+        let result_upper = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("SALAD".to_string()),
+            today(),
+        );
 
         // Test with mixed case filter
-        let result_mixed =
-            format_restaurants_with_menus(&restaurants, &menus, &Some("SaLaD".to_string()), 0);
+        let result_mixed = format_restaurants_with_menus(
+            &restaurants,
+            &menus,
+            &Some("SaLaD".to_string()),
+            today(),
+        );
 
         // All three should match the same item "Chicken salad"
         assert_eq!(result_lower, result_upper);
@@ -331,7 +353,7 @@ mod tests {
         let restaurants = vec![test_fixtures::restaurant_without_hours()];
         let menus = test_fixtures::empty_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, today());
 
         assert_eq!(result.len(), 1);
         assert_eq!(result[0].name, "Mystery Restaurant");
@@ -343,7 +365,7 @@ mod tests {
         let restaurants = vec![test_fixtures::restaurant_without_hours()];
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, today());
 
         assert_eq!(result.len(), 1);
         assert!(result[0].opening_hours.is_none());
@@ -354,7 +376,7 @@ mod tests {
         let restaurants = test_fixtures::sample_restaurants();
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, today());
 
         // Check that properties are properly joined with ", "
         let menu_items = result[0].formatted_menu_items.as_ref().unwrap();
@@ -366,7 +388,7 @@ mod tests {
         let restaurants: Vec<Restaurant> = vec![];
         let menus = test_fixtures::sample_menus();
 
-        let result = format_restaurants_with_menus(&restaurants, &menus, &None, 0);
+        let result = format_restaurants_with_menus(&restaurants, &menus, &None, today());
 
         assert!(result.is_empty());
     }
@@ -377,15 +399,15 @@ mod tests {
         let hours = restaurant.opening_hours();
 
         // Monday: "invalid" - should return false
-        assert!(!is_restaurant_open_now(hours, 0));
+        assert!(!is_restaurant_open_now(hours, 0, noon()));
         // Tuesday: "10:00" - missing end time, should return false
-        assert!(!is_restaurant_open_now(hours, 1));
+        assert!(!is_restaurant_open_now(hours, 1, noon()));
         // Wednesday: "10:00-" - empty end time, should return false
-        assert!(!is_restaurant_open_now(hours, 2));
+        assert!(!is_restaurant_open_now(hours, 2, noon()));
         // Thursday: "-14:00" - empty start time, should return false
-        assert!(!is_restaurant_open_now(hours, 3));
+        assert!(!is_restaurant_open_now(hours, 3, noon()));
         // Friday: "25:00-26:00" - invalid times, should return false
-        assert!(!is_restaurant_open_now(hours, 4));
+        assert!(!is_restaurant_open_now(hours, 4, noon()));
     }
 
     // Integration tests with real API fixtures

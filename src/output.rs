@@ -1,4 +1,4 @@
-use chrono::Local;
+use chrono::{NaiveDate, NaiveTime};
 use color_print::cprintln;
 
 use crate::search::RestaurantWithMenu;
@@ -7,13 +7,13 @@ use crate::search::RestaurantWithMenu;
 // restaurant names), not the CLI's own output. Localizing date display is out of scope.
 pub fn print_menus(
     restaurants_with_menus: Vec<RestaurantWithMenu>,
-    day_offset: i32,
+    target_date: NaiveDate,
+    now: NaiveTime,
+    is_today: bool,
     print_address: bool,
     print_url: bool,
 ) {
-    let date_offset =
-        (Local::now() + chrono::Duration::days(i64::from(day_offset))).format("%A %-d. of %B %Y");
-    cprintln!("{}", date_offset);
+    cprintln!("{}", target_date.format("%A %-d. of %B %Y"));
     cprintln!("");
     if restaurants_with_menus.is_empty() {
         cprintln!("<red>No restaurants matched your query.</>");
@@ -22,10 +22,9 @@ pub fn print_menus(
     for restaurant in restaurants_with_menus {
         match restaurant.opening_hours {
             Some(todays_opening_hours) => {
-                if day_offset != 0 {
+                if !is_today {
                     cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
                 } else {
-                    let current_time = Local::now().time();
                     let times = todays_opening_hours
                         .split_once('-')
                         .and_then(|(start, end)| {
@@ -37,10 +36,7 @@ pub fn print_menus(
                         });
 
                     match times {
-                        Some((start_time, end_time))
-                            if current_time < start_time || current_time > end_time =>
-                        {
-                            // Outside opening hours (before opening or after closing)
+                        Some((start_time, end_time)) if now < start_time || now > end_time => {
                             cprintln!(
                                 "<strong>{}</> <dim>{}</>",
                                 restaurant.name,
@@ -48,8 +44,7 @@ pub fn print_menus(
                             );
                         }
                         Some((_, end_time)) => {
-                            // Inside opening hours
-                            let closes_in = end_time.signed_duration_since(current_time);
+                            let closes_in = end_time.signed_duration_since(now);
                             let closes_in_formatted = format!(
                                 "{}h {}m",
                                 closes_in.num_hours(),
