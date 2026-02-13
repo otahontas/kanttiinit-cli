@@ -1,5 +1,5 @@
 use chrono::{NaiveDate, NaiveTime};
-use color_print::cprintln;
+use color_print::{cformat, cprintln};
 
 use crate::search::RestaurantWithMenu;
 
@@ -12,7 +12,7 @@ fn format_opening_hours_line(name: &str, hours: &str, now: NaiveTime) -> String 
 
     match times {
         Some((start_time, end_time)) if now < start_time || now > end_time => {
-            format!("<strong>{name}</> <dim>{hours}</>")
+            cformat!("<strong>{name}</> <dim>{hours}</>")
         }
         Some((_, end_time)) => {
             let closes_in = end_time.signed_duration_since(now);
@@ -21,10 +21,10 @@ fn format_opening_hours_line(name: &str, hours: &str, now: NaiveTime) -> String 
                 closes_in.num_hours(),
                 closes_in.num_minutes() % 60
             );
-            format!("<bold>{name}</> <green>{hours}</> <dim>closes in {closes_in_formatted}</>")
+            cformat!("<bold>{name}</> <green>{hours}</> <dim>closes in {closes_in_formatted}</>")
         }
         None => {
-            format!("<bold>{name}</> {hours}")
+            cformat!("<bold>{name}</> {hours}")
         }
     }
 }
@@ -85,6 +85,11 @@ mod tests {
     use super::*;
     use chrono::NaiveTime;
 
+    // ANSI escape codes used by color_print's cformat! macro
+    const ANSI_DIM: &str = "\x1b[2m";
+    const ANSI_GREEN: &str = "\x1b[32m";
+    const ANSI_BOLD: &str = "\x1b[1m";
+
     #[test]
     fn test_before_opening_shows_dim() {
         let line = format_opening_hours_line(
@@ -92,8 +97,8 @@ mod tests {
             "10:00-14:00",
             NaiveTime::from_hms_opt(8, 0, 0).unwrap(),
         );
-        assert!(line.contains("<dim>"));
-        assert!(!line.contains("<green>"));
+        assert!(line.contains(ANSI_DIM));
+        assert!(!line.contains(ANSI_GREEN));
     }
 
     #[test]
@@ -103,8 +108,8 @@ mod tests {
             "10:00-14:00",
             NaiveTime::from_hms_opt(16, 0, 0).unwrap(),
         );
-        assert!(line.contains("<dim>"));
-        assert!(!line.contains("<green>"));
+        assert!(line.contains(ANSI_DIM));
+        assert!(!line.contains(ANSI_GREEN));
     }
 
     #[test]
@@ -114,7 +119,7 @@ mod tests {
             "10:00-14:00",
             NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
         );
-        assert!(line.contains("<green>"));
+        assert!(line.contains(ANSI_GREEN));
         assert!(line.contains("closes in 2h 0m"));
     }
 
@@ -125,7 +130,7 @@ mod tests {
             "10:00-14:00",
             NaiveTime::from_hms_opt(10, 0, 0).unwrap(),
         );
-        assert!(line.contains("<green>"));
+        assert!(line.contains(ANSI_GREEN));
         assert!(line.contains("closes in 4h 0m"));
     }
 
@@ -136,7 +141,7 @@ mod tests {
             "10:00-14:00",
             NaiveTime::from_hms_opt(14, 0, 0).unwrap(),
         );
-        assert!(line.contains("<green>"));
+        assert!(line.contains(ANSI_GREEN));
         assert!(line.contains("closes in 0h 0m"));
     }
 
@@ -147,9 +152,10 @@ mod tests {
             "invalid",
             NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
         );
-        assert!(line.contains("<bold>Cafe</>"));
+        assert!(line.contains(ANSI_BOLD));
+        assert!(line.contains("Cafe"));
         assert!(line.contains("invalid"));
-        assert!(!line.contains("<green>"));
-        assert!(!line.contains("<dim>"));
+        assert!(!line.contains(ANSI_GREEN));
+        assert!(!line.contains(ANSI_DIM));
     }
 }
