@@ -1,6 +1,6 @@
 [package]
 name = "kanttiinit"
-version = "0.3.0"
+version = "0.3.1"
 description = "Command-line interface for browsing restaurant menus from Kanttiinit.fi"
 authors = ["Kanttiinit Contributors"]
 edition = "2021"
