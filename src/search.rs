@@ -115,6 +115,7 @@ pub fn get_menus(
     let day_to_fetch_query =
         (Local::now() + chrono::Duration::days(i64::from(day_offset))).format("%Y-%m-%d");
 
+    let day_key = day_to_fetch_query.to_string();
     Ok(ureq::get("https://kitchen.kanttiinit.fi/menus")
         .query(
             "restaurants",
@@ -124,22 +125,17 @@ pub fn get_menus(
                 .collect::<Vec<String>>()
                 .join(","),
         )
-        .query("days", &day_to_fetch_query.to_string())
+        .query("days", &day_key)
         .query("lang", lang)
         .call()?
         .into_json::<MenusFromApi>()?
         .into_iter()
-        .fold(
-            HashMap::new(),
-            |mut acc, (restaurant_id, menu_for_this_day_map)| {
-                if let Some(menu_for_this_day) =
-                    menu_for_this_day_map.get(&day_to_fetch_query.to_string())
-                {
-                    acc.insert(restaurant_id, menu_for_this_day.clone());
-                }
-                acc
-            },
-        ))
+        .filter_map(|(restaurant_id, menu_for_this_day_map)| {
+            menu_for_this_day_map
+                .get(&day_key)
+                .map(|menu| (restaurant_id, menu.clone()))
+        })
+        .collect())
 }
 
 #[derive(PartialEq, Debug)]
