@@ -1,5 +1,8 @@
 # Kanttiinit CLI
 
+[![CI](https://github.com/otahontas/kanttiinit-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/otahontas/kanttiinit-cli/actions/workflows/ci.yml)
+[![Security Audit](https://github.com/otahontas/kanttiinit-cli/actions/workflows/security-audit.yml/badge.svg)](https://github.com/otahontas/kanttiinit-cli/actions/workflows/security-audit.yml)
+
 Rust port of [c++ based kanttiinit cli](https://github.com/kanttiinit/cli), a cli to browse Helsinki area student restaurant menus. Supports the same features (and couple of extra ones) as the c++ version.
 
 ![Demo](demo.gif)
