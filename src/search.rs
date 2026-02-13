@@ -96,7 +96,8 @@ pub fn get_restaurants(
         .query("query", query)
         .query("lang", lang)
         .call()?
-        .into_json::<Restaurants>()?
+        .body_mut()
+        .read_json::<Restaurants>()?
         .into_iter()
         .filter(|restaurant| {
             if !hide_closed {
@@ -119,7 +120,7 @@ pub fn get_menus(
     Ok(ureq::get("https://kitchen.kanttiinit.fi/menus")
         .query(
             "restaurants",
-            &restaurants
+            restaurants
                 .iter()
                 .map(|r| r.id.to_string())
                 .collect::<Vec<String>>()
@@ -128,7 +129,8 @@ pub fn get_menus(
         .query("days", &day_key)
         .query("lang", lang)
         .call()?
-        .into_json::<MenusFromApi>()?
+        .body_mut()
+        .read_json::<MenusFromApi>()?
         .into_iter()
         .filter_map(|(restaurant_id, menu_for_this_day_map)| {
             menu_for_this_day_map
