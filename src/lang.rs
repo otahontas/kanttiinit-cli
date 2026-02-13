@@ -1,19 +1,11 @@
 use anyhow::Context;
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use std::fs;
 use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 use std::str::FromStr;
-
-#[cfg(unix)]
-use xdg::BaseDirectories;
-
-#[cfg(windows)]
-use directories::ProjectDirs;
-
-#[cfg(windows)]
-use std::fs;
 
 // Single source of truth for available languages
 pub const AVAILABLE_LANGS: &[&str] = &["fi", "en"];
@@ -57,18 +49,24 @@ struct Config {
 const CONFIG_FOLDER_PREFIX: &str = env!("CARGO_PKG_NAME");
 const CONFIG_FILE_NAME: &str = "config.toml";
 
-#[cfg(unix)]
-fn get_config_file_path() -> Result<PathBuf, anyhow::Error> {
-    Ok(BaseDirectories::with_prefix(CONFIG_FOLDER_PREFIX)
-        .context("Could not get base directories")?
-        .get_config_file(CONFIG_FILE_NAME))
+fn get_config_dir() -> Result<PathBuf, anyhow::Error> {
+    #[cfg(unix)]
+    {
+        let base = std::env::var("XDG_CONFIG_HOME").unwrap_or_else(|_| {
+            let home = std::env::var("HOME").expect("HOME environment variable not set");
+            format!("{}/.config", home)
+        });
+        Ok(PathBuf::from(base).join(CONFIG_FOLDER_PREFIX))
+    }
+    #[cfg(windows)]
+    {
+        let appdata = std::env::var("APPDATA").context("APPDATA environment variable not set")?;
+        Ok(PathBuf::from(appdata).join(CONFIG_FOLDER_PREFIX))
+    }
 }
 
-#[cfg(windows)]
 fn get_config_file_path() -> Result<PathBuf, anyhow::Error> {
-    let proj_dirs = ProjectDirs::from("", "", CONFIG_FOLDER_PREFIX)
-        .context("Could not determine project directories")?;
-    Ok(proj_dirs.config_dir().join(CONFIG_FILE_NAME))
+    Ok(get_config_dir()?.join(CONFIG_FILE_NAME))
 }
 
 fn get_config_from_file_or_return_default_config() -> Result<Config, anyhow::Error> {
@@ -84,20 +82,9 @@ fn get_config_from_file_or_return_default_config() -> Result<Config, anyhow::Err
     }
 }
 
-#[cfg(unix)]
 fn create_config_directories_and_get_config_file_path() -> Result<PathBuf, anyhow::Error> {
-    BaseDirectories::with_prefix(CONFIG_FOLDER_PREFIX)
-        .context("Could not get base directories")?
-        .place_config_file(CONFIG_FILE_NAME)
-        .context("Could not place config file")
-}
-
-#[cfg(windows)]
-fn create_config_directories_and_get_config_file_path() -> Result<PathBuf, anyhow::Error> {
-    let proj_dirs = ProjectDirs::from("", "", CONFIG_FOLDER_PREFIX)
-        .context("Could not determine project directories")?;
-    let config_dir = proj_dirs.config_dir();
-    fs::create_dir_all(config_dir).context("Could not create config directory")?;
+    let config_dir = get_config_dir()?;
+    fs::create_dir_all(&config_dir).context("Could not create config directory")?;
     Ok(config_dir.join(CONFIG_FILE_NAME))
 }
 
