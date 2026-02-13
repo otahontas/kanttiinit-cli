@@ -23,8 +23,8 @@ let
     name = "tk";
     version = "master";
     src = pkgs.fetchurl {
-      url = "https://raw.githubusercontent.com/wedow/ticket/master/ticket.sh";
-      sha256 = "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed";
+      url = "https://raw.githubusercontent.com/wedow/ticket/master/ticket";
+      sha256 = "a8e825ac2a18b1360d8cd0ba8c65d82099752ec93cfb5b80584885dd791cfc92";
     };
     dontUnpack = true;
     installPhase = ''
