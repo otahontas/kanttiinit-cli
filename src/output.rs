@@ -3,6 +3,32 @@ use color_print::cprintln;
 
 use crate::search::RestaurantWithMenu;
 
+fn format_opening_hours_line(name: &str, hours: &str, now: NaiveTime) -> String {
+    let times = hours.split_once('-').and_then(|(start, end)| {
+        let start_time = chrono::NaiveTime::parse_from_str(start.trim(), "%H:%M").ok()?;
+        let end_time = chrono::NaiveTime::parse_from_str(end.trim(), "%H:%M").ok()?;
+        Some((start_time, end_time))
+    });
+
+    match times {
+        Some((start_time, end_time)) if now < start_time || now > end_time => {
+            format!("<strong>{name}</> <dim>{hours}</>")
+        }
+        Some((_, end_time)) => {
+            let closes_in = end_time.signed_duration_since(now);
+            let closes_in_formatted = format!(
+                "{}h {}m",
+                closes_in.num_hours(),
+                closes_in.num_minutes() % 60
+            );
+            format!("<bold>{name}</> <green>{hours}</> <dim>closes in {closes_in_formatted}</>")
+        }
+        None => {
+            format!("<bold>{name}</> {hours}")
+        }
+    }
+}
+
 // Date formatting is English-only. The lang setting only affects API content (menu items,
 // restaurant names), not the CLI's own output. Localizing date display is out of scope.
 pub fn print_menus(
@@ -20,48 +46,15 @@ pub fn print_menus(
         return;
     }
     for restaurant in restaurants_with_menus {
-        match restaurant.opening_hours {
-            Some(todays_opening_hours) => {
-                if !is_today {
-                    cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
-                } else {
-                    let times = todays_opening_hours
-                        .split_once('-')
-                        .and_then(|(start, end)| {
-                            let start_time =
-                                chrono::NaiveTime::parse_from_str(start.trim(), "%H:%M").ok()?;
-                            let end_time =
-                                chrono::NaiveTime::parse_from_str(end.trim(), "%H:%M").ok()?;
-                            Some((start_time, end_time))
-                        });
-
-                    match times {
-                        Some((start_time, end_time)) if now < start_time || now > end_time => {
-                            cprintln!(
-                                "<strong>{}</> <dim>{}</>",
-                                restaurant.name,
-                                todays_opening_hours
-                            );
-                        }
-                        Some((_, end_time)) => {
-                            let closes_in = end_time.signed_duration_since(now);
-                            let closes_in_formatted = format!(
-                                "{}h {}m",
-                                closes_in.num_hours(),
-                                closes_in.num_minutes() % 60
-                            );
-                            cprintln!(
-                                "<bold>{}</> <green>{}</> <dim>closes in {}</>",
-                                restaurant.name,
-                                todays_opening_hours,
-                                closes_in_formatted
-                            );
-                        }
-                        None => {
-                            cprintln!("<bold>{}</> {}", restaurant.name, todays_opening_hours);
-                        }
-                    }
-                }
+        match &restaurant.opening_hours {
+            Some(hours) if is_today => {
+                cprintln!(
+                    "{}",
+                    format_opening_hours_line(&restaurant.name, hours, now)
+                );
+            }
+            Some(hours) => {
+                cprintln!("<bold>{}</> {}", restaurant.name, hours);
             }
             None => {
                 cprintln!("<bold>{}</>", restaurant.name);
@@ -89,103 +82,74 @@ pub fn print_menus(
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use chrono::NaiveTime;
 
     #[test]
-    fn test_outside_hours_before_opening_shows_gray() {
-        // Simulate time at 08:00, restaurant opens at 10:00-14:00
-        let opening_hours = "10:00-14:00";
-        let current_time = NaiveTime::from_hms_opt(8, 0, 0).unwrap();
-
-        let (start_str, _) = opening_hours.split_once('-').unwrap();
-        let start_time = NaiveTime::parse_from_str(start_str.trim(), "%H:%M").unwrap();
-
-        // Before opening hours
-        assert!(current_time < start_time);
-        // Should show gray (dim) format, not green
-        // This is the behavior we want: <strong>Name</> <dim>10:00-14:00</>
+    fn test_before_opening_shows_dim() {
+        let line = format_opening_hours_line(
+            "Cafe",
+            "10:00-14:00",
+            NaiveTime::from_hms_opt(8, 0, 0).unwrap(),
+        );
+        assert!(line.contains("<dim>"));
+        assert!(!line.contains("<green>"));
     }
 
     #[test]
-    fn test_outside_hours_after_closing_shows_gray() {
-        // Simulate time at 16:00, restaurant closes at 14:00
-        let opening_hours = "10:00-14:00";
-        let current_time = NaiveTime::from_hms_opt(16, 0, 0).unwrap();
-
-        let (_, end_str) = opening_hours.split_once('-').unwrap();
-        let end_time = NaiveTime::parse_from_str(end_str.trim(), "%H:%M").unwrap();
-
-        // After closing hours
-        assert!(current_time > end_time);
-        // Should show gray (dim) format, not green
-        // This is the behavior we want: <strong>Name</> <dim>10:00-14:00</>
+    fn test_after_closing_shows_dim() {
+        let line = format_opening_hours_line(
+            "Cafe",
+            "10:00-14:00",
+            NaiveTime::from_hms_opt(16, 0, 0).unwrap(),
+        );
+        assert!(line.contains("<dim>"));
+        assert!(!line.contains("<green>"));
     }
 
     #[test]
-    fn test_outside_hours_no_closing_in_message() {
-        // When outside hours, should NOT show "closing in X hours Y mins"
-        let opening_hours = "10:00-14:00";
-
-        // Test before opening (08:00)
-        let current_time_before = NaiveTime::from_hms_opt(8, 0, 0).unwrap();
-        let (start_str, _) = opening_hours.split_once('-').unwrap();
-        let start_time = NaiveTime::parse_from_str(start_str.trim(), "%H:%M").unwrap();
-        assert!(current_time_before < start_time);
-        // Should NOT calculate or show "closing in" message
-
-        // Test after closing (16:00)
-        let current_time_after = NaiveTime::from_hms_opt(16, 0, 0).unwrap();
-        let (_, end_str) = opening_hours.split_once('-').unwrap();
-        let end_time = NaiveTime::parse_from_str(end_str.trim(), "%H:%M").unwrap();
-        assert!(current_time_after > end_time);
-        // Should NOT calculate or show "closing in" message
+    fn test_during_open_hours_shows_green_with_closes_in() {
+        let line = format_opening_hours_line(
+            "Cafe",
+            "10:00-14:00",
+            NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        );
+        assert!(line.contains("<green>"));
+        assert!(line.contains("closes in 2h 0m"));
     }
 
     #[test]
-    fn test_inside_hours_shows_green() {
-        // Simulate time at 12:00, restaurant open 10:00-14:00
-        let opening_hours = "10:00-14:00";
-        let current_time = NaiveTime::from_hms_opt(12, 0, 0).unwrap();
-
-        let (start_str, end_str) = opening_hours.split_once('-').unwrap();
-        let start_time = NaiveTime::parse_from_str(start_str.trim(), "%H:%M").unwrap();
-        let end_time = NaiveTime::parse_from_str(end_str.trim(), "%H:%M").unwrap();
-
-        // Inside opening hours
-        assert!(current_time >= start_time && current_time <= end_time);
-        // Should show green format with "closing in" message
-        // This is the behavior we want: <bold>Name</> <green>10:00-14:00</> <dim>closes in 2h 0m</>
-
-        let closes_in = end_time.signed_duration_since(current_time);
-        assert_eq!(closes_in.num_hours(), 2);
+    fn test_exactly_at_opening_shows_green() {
+        let line = format_opening_hours_line(
+            "Cafe",
+            "10:00-14:00",
+            NaiveTime::from_hms_opt(10, 0, 0).unwrap(),
+        );
+        assert!(line.contains("<green>"));
+        assert!(line.contains("closes in 4h 0m"));
     }
 
     #[test]
-    fn test_edge_case_exactly_at_opening_time() {
-        // At exactly 10:00, restaurant opens at 10:00-14:00
-        let opening_hours = "10:00-14:00";
-        let current_time = NaiveTime::from_hms_opt(10, 0, 0).unwrap();
-
-        let (start_str, end_str) = opening_hours.split_once('-').unwrap();
-        let start_time = NaiveTime::parse_from_str(start_str.trim(), "%H:%M").unwrap();
-        let end_time = NaiveTime::parse_from_str(end_str.trim(), "%H:%M").unwrap();
-
-        // Exactly at opening time should count as open
-        assert!(current_time >= start_time && current_time <= end_time);
+    fn test_exactly_at_closing_shows_green() {
+        let line = format_opening_hours_line(
+            "Cafe",
+            "10:00-14:00",
+            NaiveTime::from_hms_opt(14, 0, 0).unwrap(),
+        );
+        assert!(line.contains("<green>"));
+        assert!(line.contains("closes in 0h 0m"));
     }
 
     #[test]
-    fn test_edge_case_exactly_at_closing_time() {
-        // At exactly 14:00, restaurant closes at 14:00
-        let opening_hours = "10:00-14:00";
-        let current_time = NaiveTime::from_hms_opt(14, 0, 0).unwrap();
-
-        let (start_str, end_str) = opening_hours.split_once('-').unwrap();
-        let start_time = NaiveTime::parse_from_str(start_str.trim(), "%H:%M").unwrap();
-        let end_time = NaiveTime::parse_from_str(end_str.trim(), "%H:%M").unwrap();
-
-        // Exactly at closing time - depending on implementation could be open or closed
-        // Current logic uses > end_time, so at exactly end_time it's still open
-        assert!(current_time >= start_time && current_time <= end_time);
+    fn test_unparsable_hours_shows_plain() {
+        let line = format_opening_hours_line(
+            "Cafe",
+            "invalid",
+            NaiveTime::from_hms_opt(12, 0, 0).unwrap(),
+        );
+        assert!(line.contains("<bold>Cafe</>"));
+        assert!(line.contains("invalid"));
+        assert!(!line.contains("<green>"));
+        assert!(!line.contains("<dim>"));
     }
 }
