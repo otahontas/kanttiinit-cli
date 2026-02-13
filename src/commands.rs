@@ -13,22 +13,22 @@ fn limit_restaurants(restaurants: &[Restaurant], limit: Option<u16>) -> &[Restau
 fn handle_query(query: &str, lang: &str, args: &Args) -> Result<(), anyhow::Error> {
     let restaurants = get_restaurants(query, lang, args.hide_closed)?;
 
-    // If hide_no_menu is enabled, we need to fetch menus first, then filter
-    if args.hide_no_menu {
+    let (limited, menus) = if args.hide_no_menu {
         let menus = get_menus(&restaurants, lang, args.day)?;
         let filtered: Vec<_> = restaurants
             .into_iter()
             .filter(|r| menus.contains_key(&r.id.to_string()))
             .collect();
-        let limited = limit_restaurants(&filtered, args.head);
-        let formatted = format_restaurants_with_menus(limited, &menus, &args.filter, args.day);
-        print_menus(formatted, args.day, args.address, args.url);
+        let limited = limit_restaurants(&filtered, args.head).to_vec();
+        (limited, menus)
     } else {
-        let limited = limit_restaurants(&restaurants, args.head);
-        let menus = get_menus(limited, lang, args.day)?;
-        let formatted = format_restaurants_with_menus(limited, &menus, &args.filter, args.day);
-        print_menus(formatted, args.day, args.address, args.url);
-    }
+        let limited = limit_restaurants(&restaurants, args.head).to_vec();
+        let menus = get_menus(&limited, lang, args.day)?;
+        (limited, menus)
+    };
+
+    let formatted = format_restaurants_with_menus(&limited, &menus, &args.filter, args.day);
+    print_menus(formatted, args.day, args.address, args.url);
 
     Ok(())
 }
