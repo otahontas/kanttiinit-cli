@@ -42,11 +42,10 @@ pub fn handle_arg(args: Args) -> Result<(), String> {
 
     let lang = get_lang().map_err(|e| format!("Error getting language: {}", e))?;
 
-    if args.query.is_none() {
-        return Err(
-            "Use the -q option to query restaurants. Display help with --help.".to_string(),
-        );
-    }
+    let query = args
+        .query
+        .as_deref()
+        .ok_or("Use the -q option to query restaurants. Display help with --help.".to_string())?;
 
     if args.day != 0 && args.hide_closed {
         return Err(
@@ -60,9 +59,7 @@ pub fn handle_arg(args: Args) -> Result<(), String> {
         );
     }
 
-    if let Some(query) = &args.query {
-        handle_query(query, &lang, &args).map_err(|e| format!("Error: {}", e))?;
-    }
+    handle_query(query, &lang, &args).map_err(|e| format!("Error: {}", e))?;
 
     Ok(())
 }
