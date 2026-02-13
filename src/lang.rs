@@ -1,5 +1,4 @@
 use anyhow::Context;
-use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::fs;
 use std::fs::File;
@@ -41,13 +40,28 @@ impl fmt::Display for Lang {
     }
 }
 
-#[derive(Deserialize, Serialize)]
-struct Config {
-    lang: String,
-}
-
 const CONFIG_FOLDER_PREFIX: &str = env!("CARGO_PKG_NAME");
 const CONFIG_FILE_NAME: &str = "config.toml";
+const DEFAULT_LANG: &str = "en";
+
+/// Parse `lang = "value"` from config file contents.
+fn parse_lang_from_config(contents: &str) -> Option<String> {
+    for line in contents.lines() {
+        let line = line.trim();
+        if let Some(rest) = line.strip_prefix("lang") {
+            let rest = rest.trim_start();
+            if let Some(rest) = rest.strip_prefix('=') {
+                let rest = rest.trim();
+                if let Some(rest) = rest.strip_prefix('"') {
+                    if let Some(value) = rest.strip_suffix('"') {
+                        return Some(value.to_string());
+                    }
+                }
+            }
+        }
+    }
+    None
+}
 
 fn get_config_dir() -> Result<PathBuf, anyhow::Error> {
     #[cfg(unix)]
@@ -69,16 +83,14 @@ fn get_config_file_path() -> Result<PathBuf, anyhow::Error> {
     Ok(get_config_dir()?.join(CONFIG_FILE_NAME))
 }
 
-fn get_config_from_file_or_return_default_config() -> Result<Config, anyhow::Error> {
+fn get_lang_from_config_file() -> Result<String, anyhow::Error> {
     let config_path = get_config_file_path().context("Could not get config file path")?;
     if config_path.exists() {
         let contents =
             std::fs::read_to_string(config_path).context("Could not read config file")?;
-        Ok(toml::from_str(&contents).context("Could not parse config file as TOML")?)
+        Ok(parse_lang_from_config(&contents).unwrap_or_else(|| DEFAULT_LANG.to_string()))
     } else {
-        Ok(Config {
-            lang: "en".to_string(),
-        })
+        Ok(DEFAULT_LANG.to_string())
     }
 }
 
@@ -89,25 +101,19 @@ fn create_config_directories_and_get_config_file_path() -> Result<PathBuf, anyho
 }
 
 pub fn get_lang() -> Result<String, anyhow::Error> {
-    Ok(Lang::from_str(
-        &get_config_from_file_or_return_default_config()
-            .context("Could not get config")?
-            .lang,
-    )
-    .context("Could not parse language value")?
-    .to_string())
+    let lang_str = get_lang_from_config_file().context("Could not get config")?;
+    Ok(Lang::from_str(&lang_str)
+        .context("Could not parse language value")?
+        .to_string())
 }
 
 pub fn set_lang(lang_from_user: &str) -> Result<(), anyhow::Error> {
     let lang = Lang::from_str(lang_from_user)?;
-    let config = Config {
-        lang: lang.to_string(),
-    };
-    let toml = toml::to_string(&config).context("Could not serialize config to TOML")?;
+    let config_contents = format!("lang = \"{}\"\n", lang);
     let config_path = create_config_directories_and_get_config_file_path()
         .context("Could not get config file")?;
     let mut config_file = File::create(config_path).context("Could not create config file")?;
-    write!(config_file, "{}", toml).context("Could not write to config file")?;
+    write!(config_file, "{}", config_contents).context("Could not write to config file")?;
     Ok(())
 }
 
@@ -135,20 +141,35 @@ mod tests {
     }
 
     #[test]
-    fn test_config_serialization() {
-        let config = Config {
-            lang: "en".to_string(),
-        };
-        let toml_str = toml::to_string(&config).expect("serialization should succeed");
-        assert!(toml_str.contains("lang"));
-        assert!(toml_str.contains("en"));
+    fn test_parse_lang_from_config_valid() {
+        assert_eq!(
+            parse_lang_from_config("lang = \"fi\"\n"),
+            Some("fi".to_string())
+        );
+        assert_eq!(
+            parse_lang_from_config("lang = \"en\"\n"),
+            Some("en".to_string())
+        );
     }
 
     #[test]
-    fn test_config_deserialization() {
-        let toml_str = "lang = \"fi\"";
-        let config: Config = toml::from_str(toml_str).expect("deserialization should succeed");
-        assert_eq!(config.lang, "fi");
+    fn test_parse_lang_from_config_with_whitespace() {
+        assert_eq!(
+            parse_lang_from_config("  lang  =  \"fi\"  \n"),
+            Some("fi".to_string())
+        );
+    }
+
+    #[test]
+    fn test_parse_lang_from_config_missing() {
+        assert_eq!(parse_lang_from_config(""), None);
+        assert_eq!(parse_lang_from_config("other = \"value\""), None);
+    }
+
+    #[test]
+    fn test_parse_lang_from_config_malformed() {
+        assert_eq!(parse_lang_from_config("lang = fi"), None);
+        assert_eq!(parse_lang_from_config("lang fi"), None);
     }
 
     #[test]
