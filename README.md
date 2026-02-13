@@ -16,7 +16,7 @@ Rust port of [c++ based kanttiinit cli](https://github.com/kanttiinit/cli), a cl
 
 ### From GitHub Releases (Recommended)
 
-Download pre-built binaries for your platform from the [releases page](https://github.com/Kanttiinit/cli/releases).
+Download pre-built binaries for your platform from the [releases page](https://github.com/otahontas/kanttiinit-cli/releases).
 
 ### From source
 
