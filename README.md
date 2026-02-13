@@ -128,6 +128,8 @@ cargo build --release
 4. Use conventional commits: `feat: add feature`, `fix: bug fix`, `docs: update docs`
 5. Push and open a Pull Request
 
+Tickets are handled with [tk](https://github.com/wedow/ticket) CLI tool.
+
 ## Acknowledgments
 
 - [Kanttiinit.fi](https://kanttiinit.fi) for the API
