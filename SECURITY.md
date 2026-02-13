@@ -9,4 +9,4 @@
 
 ## Reporting a Vulnerability
 
-Please report security vulnerabilities by creating a new issue on the [GitHub repository](https://github.com/Kanttiinit/cli/issues).
+Please report security vulnerabilities by creating a new issue on the [GitHub repository](https://github.com/otahontas/kanttiinit-cli/issues).
