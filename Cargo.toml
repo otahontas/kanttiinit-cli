@@ -24,9 +24,17 @@ name = "kanttiinit"
 [dependencies]
 anyhow = "1.0.86"
 chrono = "0.4.38"
-clap = { version = "4.5.16", features = ["default", "derive", "wrap_help"] }
+clap = { version = "4.5.16", default-features = false, features = [
+  "derive",
+  "std",
+  "help",
+  "usage",
+] }
 serde = { version = "1.0.208", features = ["derive"] }
-ureq = { version = "3.2.0", features = ["json"] }
+ureq = { version = "3.2.0", default-features = false, features = [
+  "json",
+  "rustls",
+] }
 
 [dev-dependencies]
 serde_json = "1.0"
