@@ -17,6 +17,20 @@ let
       rustfmt.enable = true;
     };
   };
+
+  # Ticket CLI tool
+  tk = pkgs.stdenv.mkDerivation {
+    name = "tk";
+    version = "master";
+    src = pkgs.fetchurl {
+      url = "https://raw.githubusercontent.com/wedow/ticket/master/ticket.sh";
+      sha256 = "d5558cd419c8d46bdc958064cb97f963d1ea793866414c025906ec15033512ed";
+    };
+    dontUnpack = true;
+    installPhase = ''
+      install -Dm755 $src $out/bin/tk
+    '';
+  };
 in
 {
   languages.rust = {
@@ -30,6 +44,7 @@ in
     pkgs.cargo-edit
     pkgs.commitlint
     pkgs.gitleaks
+    tk
   ];
 
   enterShell = ''
