@@ -2,6 +2,8 @@
 
 Rust port of [c++ based kanttiinit cli](https://github.com/kanttiinit/cli), a cli to browse Helsinki area student restaurant menus. Supports the same features (and couple of extra ones) as the c++ version.
 
+![Demo](demo.gif)
+
 ## Features
 
 - Query-based search by restaurant or area name
