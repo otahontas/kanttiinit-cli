@@ -2,7 +2,7 @@ inputs:
   nixpkgs:
     url: github:cachix/devenv-nixpkgs/538a5124359f0b3d466e1160378c87887e3b51a4
   devenv:
-    url: github:cachix/devenv/23729dc54bbca0f36878ae2935cbfea834335f1a?dir=src/modules
+    url: github:cachix/devenv?dir=src/modules
   treefmt-nix:
     url: github:numtide/treefmt-nix
     inputs:
