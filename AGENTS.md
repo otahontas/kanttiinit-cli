@@ -5,4 +5,5 @@
 
 ## Tools
 
+- Use `devenv` (and `direnv` when enabled) for repo commands and tooling.
 - Tickets are handled with `tk` CLI tool.

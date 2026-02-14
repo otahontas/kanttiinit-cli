@@ -89,7 +89,9 @@ The language preference is saved in `~/.config/kanttiinit/config.toml`.
 
 ### Prerequisites
 
-This project uses [devenv](https://devenv.sh) to manage the development environment. Install devenv and optionally [direnv](https://direnv.net) for automatic shell activation.
+This project uses [devenv](https://devenv.sh) to manage the development environment. Install [devenv](https://devenv.sh) and optionally [direnv](https://direnv.net) for automatic shell activation.
+
+All development tools used in this repo are provided by devenv (except devenv and direnv themselves), so no extra global tool installs are needed.
 
 ### Setup
 

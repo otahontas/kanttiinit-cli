@@ -44,6 +44,7 @@ in
     pkgs.cargo-edit
     pkgs.commitlint
     pkgs.gitleaks
+    pkgs.git
     tk
   ];
 
@@ -55,6 +56,15 @@ in
     cargo --version
     rustc --version
     treefmt --version
+
+    command -v cargo-watch
+    command -v commitlint
+    command -v gitleaks
+    command -v deadnix
+    command -v statix
+    command -v typos
+    command -v tk
+    command -v git
   '';
 
   tasks = {
