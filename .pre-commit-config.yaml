@@ -1,0 +1,63 @@
+default_install_hook_types:
+  - pre-commit
+  - commit-msg
+  - pre-push
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: check-merge-conflict
+        types: [text]
+
+  - repo: local
+    hooks:
+      - id: deadnix
+        name: deadnix
+        language: system
+        entry: deadnix --fail
+        files: '\.nix$'
+
+      - id: statix
+        name: statix
+        language: system
+        entry: statix check --format errfmt --ignore .devenv,.devenv.*,.direnv,target .
+        files: '\.nix$'
+        pass_filenames: false
+
+      - id: typos
+        name: typos
+        language: system
+        entry: typos --force-exclude
+        types: [text]
+
+      - id: treefmt
+        name: treefmt
+        language: system
+        entry: treefmt --fail-on-change --no-cache
+
+      - id: commitlint
+        name: commitlint
+        language: system
+        entry: commitlint --extends @commitlint/config-conventional --edit
+        stages: [commit-msg]
+
+      - id: gitleaks
+        name: gitleaks
+        language: system
+        entry: gitleaks protect --staged --verbose
+        pass_filenames: false
+
+      - id: clippy
+        name: clippy
+        language: system
+        entry: cargo clippy --all-targets --all-features -- -D warnings
+        files: '\.rs$'
+        pass_filenames: false
+
+      - id: cargo-test
+        name: cargo-test
+        language: system
+        entry: cargo test
+        stages: [pre-push]
+        pass_filenames: false

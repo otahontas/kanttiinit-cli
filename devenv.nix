@@ -45,10 +45,15 @@ in
     pkgs.commitlint
     pkgs.gitleaks
     pkgs.git
+    pkgs.prek
+    pkgs.deadnix
+    pkgs.statix
+    pkgs.typos
     tk
   ];
 
   enterShell = ''
+    prek install 2>/dev/null
     echo "kanttiinit-cli dev shell. Run 'devenv tasks list' to see available tasks."
   '';
 
@@ -56,6 +61,7 @@ in
     cargo --version
     rustc --version
     treefmt --version
+    prek --version
 
     command -v cargo-watch
     command -v commitlint
@@ -94,44 +100,4 @@ in
     };
   };
 
-  git-hooks.hooks = {
-    check-merge-conflicts.enable = true;
-    deadnix.enable = true;
-    statix = {
-      enable = true;
-      entry = "${pkgs.statix}/bin/statix check --format errfmt --ignore .devenv,.devenv.*,.direnv,target .";
-      pass_filenames = false;
-    };
-    typos.enable = true;
-
-    treefmt = {
-      enable = true;
-      package = treefmtEval.config.build.wrapper;
-    };
-
-    commitlint = {
-      enable = true;
-      stages = [ "commit-msg" ];
-      entry = "${pkgs.commitlint}/bin/commitlint --extends @commitlint/config-conventional --edit";
-    };
-
-    gitleaks = {
-      enable = true;
-      entry = "${pkgs.gitleaks}/bin/gitleaks protect --staged --verbose";
-    };
-
-    clippy = {
-      enable = true;
-      entry = "cargo clippy --all-targets --all-features -- -D warnings";
-      pass_filenames = false;
-    };
-
-    cargo-test = {
-      enable = true;
-      name = "cargo-test";
-      entry = "cargo test";
-      stages = [ "pre-push" ];
-      pass_filenames = false;
-    };
-  };
 }
