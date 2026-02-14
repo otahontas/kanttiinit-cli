@@ -97,7 +97,11 @@ in
   git-hooks.hooks = {
     check-merge-conflicts.enable = true;
     deadnix.enable = true;
-    statix.enable = true;
+    statix = {
+      enable = true;
+      entry = "${pkgs.statix}/bin/statix check --format errfmt --ignore .devenv,.devenv.*,.direnv,target .";
+      pass_filenames = false;
+    };
     typos.enable = true;
 
     treefmt = {
