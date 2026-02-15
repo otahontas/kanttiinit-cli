@@ -1,8 +1,7 @@
+# yaml-language-server: $schema=https://devenv.sh/devenv.schema.json
 inputs:
   nixpkgs:
-    url: github:cachix/devenv-nixpkgs/538a5124359f0b3d466e1160378c87887e3b51a4
-  devenv:
-    url: github:cachix/devenv?dir=src/modules
+    url: github:cachix/devenv-nixpkgs/rolling
   treefmt-nix:
     url: github:numtide/treefmt-nix
     inputs:

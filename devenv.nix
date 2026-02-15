@@ -40,11 +40,11 @@ in
 
   packages = [
     treefmtEval.config.build.wrapper
-    pkgs.cargo-watch
     pkgs.cargo-edit
+    pkgs.cargo-watch
     pkgs.commitlint
-    pkgs.gitleaks
     pkgs.git
+    pkgs.gitleaks
     tk
   ];
 
@@ -97,12 +97,14 @@ in
   git-hooks.hooks = {
     check-merge-conflicts.enable = true;
     deadnix.enable = true;
+    detect-private-keys.enable = true;
+    typos.enable = true;
+
     statix = {
       enable = true;
       entry = "${pkgs.statix}/bin/statix check --format errfmt --ignore .devenv,.devenv.*,.direnv,target .";
       pass_filenames = false;
     };
-    typos.enable = true;
 
     treefmt = {
       enable = true;
