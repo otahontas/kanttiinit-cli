@@ -1,6 +1,6 @@
 ---
 id: kc-a2mf
-status: open
+status: closed
 deps: []
 links: []
 created: 2026-02-13T12:06:59Z

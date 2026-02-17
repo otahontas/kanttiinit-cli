@@ -1,6 +1,6 @@
 ---
 id: kc-q1sv
-status: done
+status: closed
 deps: []
 links: []
 created: 2026-02-13T07:22:39Z
