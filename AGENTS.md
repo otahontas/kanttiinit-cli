@@ -2,6 +2,7 @@
 
 - Push directly to main — no branches or pull requests needed
 - CI runs tests and handles releases automatically
+- For each new release version, keep version fields in sync: update `Cargo.toml` and `flake.nix` (and `CHANGELOG.md`).
 
 ## Tools
 
