@@ -25,7 +25,7 @@
         {
           default = pkgs.rustPlatform.buildRustPackage {
             pname = "kanttiinit";
-            version = "0.2.0";
+            version = "0.3.4";
             src = ./.;
             cargoLock.lockFile = ./Cargo.lock;
             meta = {
