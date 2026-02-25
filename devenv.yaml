@@ -4,11 +4,15 @@ inputs:
     url: github:cachix/devenv-nixpkgs/rolling
   treefmt-nix:
     url: github:numtide/treefmt-nix
-    inputs:
-      nixpkgs:
-        follows: "nixpkgs"
+    flake: false
   rust-overlay:
     url: github:oxalica/rust-overlay
     inputs:
       nixpkgs:
         follows: "nixpkgs"
+  devenv-base:
+    url: github:otahontas/devenv-base
+    flake: false
+
+imports:
+  - devenv-base

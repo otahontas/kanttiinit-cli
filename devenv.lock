@@ -16,6 +16,21 @@
         "type": "github"
       }
     },
+    "devenv-base": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1772017820,
+        "owner": "otahontas",
+        "repo": "devenv-base",
+        "rev": "203ea50be3e3416340ef9b25d2cef710d2dbcb78",
+        "type": "github"
+      },
+      "original": {
+        "owner": "otahontas",
+        "repo": "devenv-base",
+        "type": "github"
+      }
+    },
     "flake-compat": {
       "flake": false,
       "locked": {
@@ -109,6 +124,7 @@
     "root": {
       "inputs": {
         "devenv": "devenv",
+        "devenv-base": "devenv-base",
         "git-hooks": "git-hooks",
         "nixpkgs": "nixpkgs",
         "pre-commit-hooks": [
@@ -125,10 +141,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1771038269,
+        "lastModified": 1771988922,
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "d7a86c8a4df49002446737603a3e0d7ef91a9637",
+        "rev": "f4443dc3f0b6c5e6b77d923156943ce816d1fcb9",
         "type": "github"
       },
       "original": {
@@ -138,11 +154,7 @@
       }
     },
     "treefmt-nix": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
+      "flake": false,
       "locked": {
         "lastModified": 1770228511,
         "owner": "numtide",
