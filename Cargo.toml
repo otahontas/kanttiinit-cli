@@ -23,8 +23,8 @@ name = "kanttiinit"
 
 [dependencies]
 anyhow = "1.0.102"
-chrono = "0.4.43"
-clap = { version = "4.5.60", default-features = false, features = [
+chrono = "0.4.44"
+clap = { version = "4.6.0", default-features = false, features = [
   "derive",
   "std",
   "help",
