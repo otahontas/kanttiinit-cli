@@ -120,7 +120,7 @@ jobs:
           7z a ../../../kanttiinit-${{ matrix.target }}.zip ${{ matrix.artifact }}
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: kanttiinit-${{ matrix.target }}
           path: kanttiinit-${{ matrix.target }}.*
