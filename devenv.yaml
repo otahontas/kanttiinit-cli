@@ -1,14 +1,21 @@
-# yaml-language-server: $schema=https://devenv.sh/devenv.schema.json
 inputs:
-  nixpkgs:
-    url: github:cachix/devenv-nixpkgs/rolling
-  treefmt-nix:
-    url: github:numtide/treefmt-nix
+  devenv-base:
+    url: github:otahontas/devenv-base
+    flake: false
+  git-hooks:
+    url: github:cachix/git-hooks.nix
     inputs:
       nixpkgs:
-        follows: "nixpkgs"
+        follows: nixpkgs
+  nixpkgs:
+    url: github:cachix/devenv-nixpkgs/rolling
   rust-overlay:
     url: github:oxalica/rust-overlay
     inputs:
       nixpkgs:
-        follows: "nixpkgs"
+        follows: nixpkgs
+  treefmt-nix:
+    url: github:numtide/treefmt-nix
+    flake: false
+imports:
+  - devenv-base
