@@ -12,6 +12,10 @@
     };
   };
 
+  devenv-base.gitignore.extraEntries = [
+    "target/"
+  ];
+
   packages = [
     pkgs.cargo-edit
     pkgs.cargo-watch
