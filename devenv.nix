@@ -5,16 +5,14 @@
     channel = "stable";
   };
 
-  devenv-base.treefmt = {
-    programs = {
+  devenv-base = {
+    treefmt.programs = {
       taplo.enable = true;
       rustfmt.enable = true;
     };
+    nvim.extraLsps = [ "rust_analyzer" ];
+    gitignore.extraEntries = [ "target/" ];
   };
-
-  devenv-base.gitignore.extraEntries = [
-    "target/"
-  ];
 
   packages = [
     pkgs.cargo-edit
